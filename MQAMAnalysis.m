@@ -3,6 +3,10 @@
 clear variables
 clc
 
+% Function Paths ----------------------------------------------------------
+
+addpath("./Functions")
+
 % Variables ---------------------------------------------------------------
 
 x           = 2.5;                      % Transmission Distance (cm)
@@ -10,8 +14,10 @@ v           = 0.1;                      % Diffusivity coefficient (cm^2/s)
 M           = 1;                        % Injected mass (kg)
 D_R         = 1e-5;
 bitLength   = 100;                      % Transmitted Random bit length
-Tt          = 20;                       % Bit duration (counter) (sec)
+symbolDuration          = 20;                       % Bit duration (counter) (sec)
 r           = 0.3;
+levelIterator   = 1;
+levelCounter    = 2;
 
 % loop parameters ---------------------------------------------------------
 
@@ -20,19 +26,18 @@ l_max  = 25;                        % mininum value
 l_mid  = 1;                        % incrimental value
 
 % -------------------------------------------------------------------------
-
-level_iterator = 1;
-levelCounter = 2;
     
-        S_I_XY          = zeros(l_max./l_mid+1 ,3);   % Error
-        T_I_XY          = zeros(l_max./l_mid+1 ,3);   % Error
-        S_Error         = zeros(l_max./l_mid+1 ,3);   % Error    
-        T_Error         = zeros(l_max./l_mid+1 ,3);   % Error
-    	T_Correct       = zeros(l_max./l_mid+1 ,3);   % Error
-       	S_Correct       = zeros(l_max./l_mid+1 ,3);   % Error
+S_I_XY          = zeros(l_max./l_mid+1 ,3);   % Error
+T_I_XY          = zeros(l_max./l_mid+1 ,3);   % Error
+S_Error         = zeros(l_max./l_mid+1 ,3);   % Error    
+T_Error         = zeros(l_max./l_mid+1 ,3);   % Error
+T_Correct       = zeros(l_max./l_mid+1 ,3);   % Error
+S_Correct       = zeros(l_max./l_mid+1 ,3);   % Error
+
+% -------------------------------------------------------------------------
 
 for  D_L = 0.1:0.1:0.4
-                                  % Advective Flow (cm)
+
     counter = 1;
 
     for Es_N0 = l_min:l_mid:l_max                                       % Counter operator (dB)
@@ -49,9 +54,7 @@ for  D_L = 0.1:0.1:0.4
         Input_Alphabet  = zeros(levelCounter   ,levelCounter);       % Input Alph.
         Decoded         = zeros(1               ,bitLength);                               % Decoded
         Cecoded         = zeros(1               ,bitLength);                               % Cecoded
-        mu_m            = zeros(levelCounter^2 ,2);
         Rn              = zeros(1, bitLength);
-        T_Prob          = zeros(levelCounter^2, levelCounter^2);
 
         S_Adj_Probability_Matrix = zeros(levelCounter^2,levelCounter^2);
         T_Adj_Probability_Matrix = zeros(levelCounter^2,levelCounter^2);
@@ -61,15 +64,6 @@ for  D_L = 0.1:0.1:0.4
         Probability_Matrix  = zeros(levelCounter^2 + 1,levelCounter^2 + 1);
         Input_Matrix        = zeros(000000000000000 + 1,levelCounter^2 + 1);
 
-
-        Cm1 = zeros(1, 1); Cm2 = zeros(1, 1); % First value of transmission
-
-        Ts      = 0;                        % Transmission time                 
-                                            % (keep it 0)
-        Q_neg   = 0;                        % Flushed chemicals                 
-                                            % (keep it 0)
-        Q1 = zeros(1, 1); Q2 = zeros(1, 1);
-        
         randomBits1 = 2*(randperm(length(...
                          randi(levelCounter,1,bitLength))));
         randomBits2 = 2*(randperm(length(...
@@ -84,268 +78,31 @@ for  D_L = 0.1:0.1:0.4
         [bitSequence2, ...
          bitRepetition2]     = splitter(randomBits2);
 
-        for con = 2:1:length(message1)
-
-                if message1(con) > message1(con-1)
-
-                    M_old = Cm1(end);
-
-                    for t = 1:1:k1(con)*Tt
-
-                        Q1(t) = M_old + (message1(con) - message1(con-1)) ...
-                                 - (message1(con) - message1(con-1))/2*...
-                                 (erf((x-v*t)/sqrt(4*D_L*t)) + ...
-                                  erf((x+v*t)/sqrt(4*D_L*t)));
-                   
-                        Cm1(t + Ts) = Q1(t); 
-
-                    end
-
-                else
-                        M_r = Cm1(end); 
-
-                    for t = 1:1:k1(con)*Tt
-
-                        Q1(t) = (abs(M_r - message1(con)))/2 * ...
-                           (erf((x-v*t)/sqrt(4*D_L*t)) + ...
-                            erf((x+v*t)/sqrt(4*D_L*t))) + ...
-                            message1(con);
-
-                        Cm1(t + Ts) = Q1(t); 
-
-                    end
-
-                end
-
-                Ts = k1(con)*Tt + Ts;
-
-        end
-
-        Ts = 0; Mr = 0; M_old = 0; con = 0;
-
-        for con = 2:1:length(message2)
-
-                if message2(con) > message2(con-1)
-
-                    M_old = Cm2(end);
-
-                    for t = 1:1:k2(con)*Tt
-
-                        Q2(t) = M_old + (message2(con) - message2(con-1)) ...
-                              - (message2(con) - message2(con-1))/2 * ...
-                                (erf((x-v*t)/sqrt(4*D_L*t)) + ...
-                                 erf((x+v*t)/sqrt(4*D_L*t)));
-
-                        Cm2(t + Ts) = Q2(t); 
-
-                    end
-
-                else
-                        M_r = Cm2(end); 
-
-                    for t = 1:1:k2(con)*Tt
-
-                        Q2(t) = (abs(M_r - message2(con)))/2 * ...
-                        (erf((x-v*t)/sqrt(4*D_L*t)) + ...
-                         erf((x+v*t)/sqrt(4*D_L*t))) + ...
-                         message2(con);
-
-                        Cm2(t + Ts) = Q2(t); 
-
-                    end
-
-                end
-
-                Ts = k2(con)*Tt + Ts;
-
-        end    
-
-        S = Cm1 + Cm2*1i - (levelCounter + 1)*(1 + 1i);
-        normal = sqrt(sum(abs(S .^2)) / (Tt*bitLength));
-
-        noise = 10^(-Es_N0/20)/sqrt(2)*(randn(1,length(Cm1)) + 1i*randn(1,length(Cm1))); % white guassian noise, 0dB variance
-        R = S/normal + noise; % additive white gaussian noise
-
-        K = snr(R,noise);
-        int_count = 1;
-
-        theo_normalization = 1.219877889386052;
+        CmP = transmission2D(D_R, D_L, v, x, r,...
+                             bitSequence1, bitRepetition1,...
+                             symbolDuration);
         
-        for a = 1:1:levelCounter
-            for b = 1:1:levelCounter
-                mu_m(int_count,:) = ([2*b 2*a]- (levelCounter + 1))/theo_normalization;
-                int_count = int_count + 1;
-            end
-        end
-   
-        min = (-levelCounter + 1)/theo_normalization;  mu_x = mu_m(:,1);
-        max = (+levelCounter - 1)/theo_normalization;  mu_y = mu_m(:,2);
+        CmQ = transmission2D(D_R, D_L, v, x, r,...
+                             bitSequence2, bitRepetition2,...
+                             symbolDuration);
 
-        cov_matrix = [1 0;0 1]*10^(-Es_N0/10)/2;
+        signal2D = complex(CmP - (levelCounter + 1),...
+                           CmQ - (levelCounter + 1));
+        
+        normal = sqrt(sum(abs(signal2D .^2)) ...
+                   / (symbolDuration*bitLength));
 
-        for a = 1:1:levelCounter^2
+        noise = 10^(-Es_N0/20)/sqrt(2)*(randn(1,bitLength*symbolDuration) + 1i*randn(1,bitLength*symbolDuration)); % white guassian noise, 0dB variance
+        
+        %signalNoised = addNoise(signal2D, 0, 1./noise);
 
-            for b = 1:1:levelCounter^2  
-                
-                if mu_x(b) > min ...                    % Inner Cases
-                && mu_x(b) < max ...
-                && mu_y(b) < max ...
-                && mu_y(b) > min  
-                    
-                    T_Prob(a,b) =  mvncdf([mu_x(b) - 1/theo_normalization , ...
-                                           mu_y(b) - 1/theo_normalization], ...
-                                          [mu_x(b) + 1/theo_normalization , ...
-                                           mu_y(b) + 1/theo_normalization], ...
-                                          [mu_m(a,1) mu_m(a,2)], ...
-                                          cov_matrix);
+        noisedSignal = signal2D/normal + noise; % additive white gaussian noise
 
-                elseif  mu_x(b) == min ...
-                     && mu_y(b) == min         % Corner Cases
-                     T_Prob(a,b) = mvncdf([-10000, -10000], ...
-                                          [min + 1/theo_normalization,min + 1/theo_normalization],...
-                                          [mu_x(a) mu_y(a)],...
-                                           cov_matrix);
-                elseif  mu_x(b) == max ...
-                     && mu_y(b) == min
-                     T_Prob(a,b) = mvncdf([max-1/theo_normalization,...
-                         -10000],...
-                         [10000, ...
-                         min+1/theo_normalization]...
-                         ,[mu_x(a) mu_y(a)],...
-                         cov_matrix);
-                elseif  mu_x(b) == min ...
-                     && mu_y(b) == max
-                     T_Prob(a,b) = mvncdf([-10000, max-1/theo_normalization],[min+1/theo_normalization,  10000],[mu_x(a) mu_y(a)],cov_matrix); 
-                elseif  mu_x(b) == max ...
-                     && mu_y(b) == max
-                     T_Prob(a,b) = mvncdf([max-1/theo_normalization, max-1/theo_normalization],[10000,   10000],[mu_x(a) mu_y(a)],cov_matrix);  
-                elseif  mu_x(b) == min ...
-                     && mu_y(b) <  max ...
-                     && mu_y(b) >  min  % Edge Cases
-                    T_Prob(a,b) = mvncdf([-10000, mu_y(b)-1/theo_normalization],[mu_x(b)+1/theo_normalization, mu_y(b)+1/theo_normalization],[mu_x(a) mu_y(a)],cov_matrix);
-                elseif  mu_x(b) == max ...
-                     && mu_y(b) <  max ...
-                     && mu_y(b) >  min
-                    T_Prob(a,b) = mvncdf([mu_x(b)-1/theo_normalization,  mu_y(b)-1/theo_normalization],[10000, mu_y(b)+1/theo_normalization],[mu_x(a) mu_y(a)],cov_matrix);         
-                elseif  mu_y(b) == min ...
-                     && mu_x(b) <  max ...
-                     && mu_x(b) >  min
-                    T_Prob(a,b) = mvncdf([mu_x(b)-1/theo_normalization,  -10000],[mu_x(b)+1/theo_normalization, mu_y(b)+1/theo_normalization],[mu_x(a) mu_y(a)],cov_matrix);
-                elseif  mu_y(b) == max ...
-                     && mu_x(b) <  max ...
-                     && mu_x(b) >  min
-                    T_Prob(a,b) = mvncdf([mu_x(b)-1/theo_normalization, mu_y(b)-1/theo_normalization],[mu_x(b)+1/theo_normalization, 10000],[mu_x(a) mu_y(a)],cov_matrix);
-                end
-            end
-        end  
+        K = snr(noisedSignal,noise);
+        
+        T_Prob = decodingTheory2D(levelCounter, Es_N0);
 
-        % Generating discrete received values from the transmission
-
-        for message_operator = 2:1:length(length_op)
-                    Rn(message_operator) = R(Tt*message_operator)*normal + (levelCounter + 1)*(1 + 1i); 
-        end
-
-        % Generation of the symbol values for use in communications
-
-        for a = 1:1:levelCounter^2 % Number of symbol values       
-            Alphabet(a) = a - 1;        
-        end
-
-        % Naming of the symbol for each constellation values
-
-        alpha_counter = 1;
-
-        for a = 1:1:levelCounter % In-phase value        
-            for b = 1:1:levelCounter  % Out-phase value          
-                Input_Alphabet(a,b) = Alphabet(alpha_counter);            
-                alpha_counter = alpha_counter + 1;
-            end
-        end
-
-        Rp = Prime_seed_1 + 1j*Prime_seed_2;
-
-        % Decoded Values
-
-        Rn_re = real(Rn); % real
-        Rn_im = imag(Rn); % imaginary
-
-
-        for dec = 2:1:bitLength    
-            for a = 1:1:levelCounter   
-                for b = 1:1:levelCounter 
-                    if Rn_re(dec) < 3 && ...
-                       Rn_im(dec) < 3
-                        Decoded(dec) = Input_Alphabet(1,1);
-                    elseif Rn_re(dec) > 2*levelCounter - 1 && ...
-                           Rn_im(dec) > 2*levelCounter - 1
-                        Decoded(dec) = ...
-                            Input_Alphabet(levelCounter  ,levelCounter  );
-                    elseif Rn_re(dec) > 2*levelCounter - 1 && ...
-                           Rn_im(dec) < 3
-                        Decoded(dec) = ...
-                            Input_Alphabet(levelCounter  ,1);
-                    elseif Rn_re(dec) < 3 && ...
-                           Rn_im(dec) > 2*levelCounter - 1
-                        Decoded(dec) = ...
-                            Input_Alphabet(1  ,levelCounter);
-                    elseif Rn_re(dec) > 2*a - 1 && ...
-                           Rn_re(dec) < 2*a + 1 && ...
-                           Rn_im(dec) > 2*levelCounter + 1
-                        Decoded(dec) = ...
-                            Input_Alphabet(a  ,levelCounter);
-                    elseif Rn_re(dec) > 2*a - 1 && ...
-                           Rn_re(dec) < 2*a + 1 && ...
-                           Rn_im(dec) < 3
-                        Decoded(dec) = ...
-                            Input_Alphabet(a  ,1);
-                    elseif Rn_im(dec) > 2*b - 1 && ...
-                           Rn_im(dec) < 2*b + 1 && ...
-                           Rn_re(dec) > 2*levelCounter + 1
-                        Decoded(dec) = ...
-                            Input_Alphabet(levelCounter  ,b);
-                    elseif Rn_im(dec) > 2*b - 1 && ...
-                           Rn_im(dec) < 2*b + 1 && ...
-                           Rn_re(dec) < 3
-                        Decoded(dec) = Input_Alphabet(1  ,b); 
-                    elseif Rn_re(dec) > 2*a-1 && ...
-                           Rn_im(dec) > 2*b-1 && ...
-                           Rn_re(dec) < 2*a+1 && ...
-                           Rn_im(dec) < 2*b+1 
-                        Decoded(dec) = Input_Alphabet(a,b);                 
-                    end
-                end
-            end
-
-             for a = 1:1:levelCounter
-                for b = 1:1:levelCounter
-                    if  Prime_seed_1(dec) >= (2*a ...
-                            - 1) ...
-                     && Prime_seed_1(dec) <= (2*a ...
-                            + 1) ...
-                     && Prime_seed_2(dec) >= (2*b ...
-                            - 1) ...
-                     && Prime_seed_2(dec) <= (2*b ...
-                            + 1)                    
-                            Cecoded(dec) = Input_Alphabet(a,b);
-                    end               
-                end
-             end        
-        end     % decision algorithm
-
-        for c = 1:1:length(Decoded)     
-            for a = 1:1:levelCounter^2 + 1
-
-                if Cecoded(c) == (a - 1)    
-                    Input_Matrix(a) = Input_Matrix(a) + 1; 
-                end
-
-                for b = 1:1:levelCounter^2 + 1          
-                    if Decoded(c) == (a - 1) && Cecoded(c) == (b - 1)                    
-                        Probability_Matrix(a,b) = Probability_Matrix(a,b) + 1;
-                    end
-                end
-            end
-        end
+        [inputMatrix, probabilityMatrix] = decodingSimulation2D(levelCounter, bitLength, symbolDuration, noisedSignal, normal);
 
         % Check values for the probability matrix and the input matrix
         % Both of them must equal to 1
@@ -388,12 +145,12 @@ for  D_L = 0.1:0.1:0.4
             end
         end
 
-        S_Error(counter,level_iterator) = sum(sum(S_Error_Matrix));
-        T_Error(counter,level_iterator) = sum(sum(T_Error_Matrix));  
+        S_Error(counter,levelIterator) = sum(sum(S_Error_Matrix));
+        T_Error(counter,levelIterator) = sum(sum(T_Error_Matrix));  
 
-        S_Correct(counter,level_iterator) = sum(sum(eye(levelCounter^2)...
+        S_Correct(counter,levelIterator) = sum(sum(eye(levelCounter^2)...
                                 .* S_Adj_Probability_Matrix));
-        T_Correct(counter,level_iterator) = sum(sum(eye(levelCounter^2)...
+        T_Correct(counter,levelIterator) = sum(sum(eye(levelCounter^2)...
                                 .* T_Adj_Probability_Matrix));
         % ---------------------------------------------------------------------
 
@@ -436,17 +193,17 @@ for  D_L = 0.1:0.1:0.4
         S_Adj_H_YX = sum(sum(S_H_YX));
         T_Adj_H_YX = sum(sum(T_H_YX));
 
-        S_I_XY(counter,level_iterator) = S_Adj_H_Y - S_Adj_H_YX;
-        T_I_XY(counter,level_iterator) = T_Adj_H_Y - T_Adj_H_YX;
+        S_I_XY(counter,levelIterator) = S_Adj_H_Y - S_Adj_H_YX;
+        T_I_XY(counter,levelIterator) = T_Adj_H_Y - T_Adj_H_YX;
 
        counter = counter + 1;
 
     end
     
-     Kr(level_iterator,:) = real(Rn);
-     Ki(level_iterator,:) = imag(Rn);   
+     Kr(levelIterator,:) = real(Rn);
+     Ki(levelIterator,:) = imag(Rn);   
      
-    level_iterator = level_iterator + 1;
+    levelIterator = levelIterator + 1;
     
    
 end
