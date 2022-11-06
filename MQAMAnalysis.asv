@@ -9,12 +9,12 @@ addpath("./Functions")
 
 % Variables ---------------------------------------------------------------
 
-x           = 2.5;                      % Transmission Distance (cm)
+x           = 1;                      % Transmission Distance (cm)
 v           = 0.1;                      % Diffusivity coefficient (cm^2/s)
 M           = 1;                        % Injected mass (kg)
 D_R         = 1e-5;
-bitLength   = 100;                      % Transmitted Random bit length
-symbolDuration          = 20;                       % Bit duration (counter) (sec)
+bitLength   = 1000;                      % Transmitted Random bit length
+symbolDuration = 20;                       % Bit duration (counter) (sec)
 r           = 0.3;
 levelIterator   = 1;
 levelCounter    = 2;
@@ -42,7 +42,6 @@ for  D_L = 0.1:0.1:0.4
 
     for Es_N0 = l_min:l_mid:l_max                                       % Counter operator (dB)
 
-        Alphabet        = zeros(levelCounter   ,levelCounter);       % Alpabet    
         S_H_YX          = zeros(levelCounter^2 ,levelCounter^2);   % Contional
         T_H_YX          = zeros(levelCounter^2 ,levelCounter^2);   % Contional
         S_H_Y           = zeros(1              ,levelCounter^2);                 % Ent. (Y)
@@ -51,18 +50,13 @@ for  D_L = 0.1:0.1:0.4
         T_Enput         = zeros(levelCounter^2 ,levelCounter^2);   % Probability 
         S_Error_Matrix  = zeros(levelCounter^2 ,levelCounter^2);   % Error
         T_Error_Matrix  = zeros(levelCounter^2 ,levelCounter^2);   % Error
-        Input_Alphabet  = zeros(levelCounter   ,levelCounter);       % Input Alph.
-        Decoded         = zeros(1               ,bitLength);                               % Decoded
-        Cecoded         = zeros(1               ,bitLength);                               % Cecoded
-        Rn              = zeros(1, bitLength);
+                              % Cecoded
 
         S_Adj_Probability_Matrix = zeros(levelCounter^2,levelCounter^2);
         T_Adj_Probability_Matrix = zeros(levelCounter^2,levelCounter^2);
         % Cleainng the input matrix and the probability matrix before each
         % iteration
 
-        Probability_Matrix  = zeros(levelCounter^2 + 1,levelCounter^2 + 1);
-        Input_Matrix        = zeros(000000000000000 + 1,levelCounter^2 + 1);
 
         randomBits1 = 2*(randperm(length(...
                          randi(levelCounter,1,bitLength))));
@@ -93,25 +87,28 @@ for  D_L = 0.1:0.1:0.4
                    / (symbolDuration*bitLength));
 
         noise = 10^(-Es_N0/20)/sqrt(2)*(randn(1,bitLength*symbolDuration) + 1i*randn(1,bitLength*symbolDuration)); % white guassian noise, 0dB variance
-        R = signal2D/normal + noise; % additive white gaussian noise
+        
+        %signalNoised = addNoise(signal2D, 0, 1./noise);
 
-        K = snr(R,noise);
+        noisedSignal = signal2D/normal + noise; % additive white gaussian noise
+
+        K = snr(noisedSignal,noise);
         
         T_Prob = decodingTheory2D(levelCounter, Es_N0);
 
-        decodingSimul
+        [inputMatrix, probabilityMatrix, Rn] = decodingSimulation2D(levelCounter, bitLength, symbolDuration, noisedSignal, normal, randomBits1, randomBits2);
 
         % Check values for the probability matrix and the input matrix
         % Both of them must equal to 1
 
         Theo_Probability_Matrix = T_Prob.*bitLength./levelCounter^2;
-        Probability_check = sum(sum(Probability_Matrix))./bitLength;
+        Probability_check = sum(sum(probabilityMatrix))./bitLength;
         Theo_check        = sum(sum(Theo_Probability_Matrix))./bitLength;
-        Input_check       = sum(sum(Input_Matrix))      ./bitLength;
+        Input_check       = sum(sum(inputMatrix))      ./bitLength;
 
         % Generation the amount of input a single output received.
 
-        Probability_length = sum(Probability_Matrix,1);
+        Probability_length = sum(probabilityMatrix,1);
         T_Probability_length = ones(1,levelCounter^2)*bitLength/levelCounter^2;
 
         % Adjusting the probability matrix by dividing the probability matrix
@@ -120,7 +117,7 @@ for  D_L = 0.1:0.1:0.4
         for a = 1:1:levelCounter^2          
             for b = 1:1:levelCounter^2           
                 S_Adj_Probability_Matrix(a,b) = ...
-                    Probability_Matrix(a,b)./Probability_length(b);           
+                    probabilityMatrix(a,b)./Probability_length(b);           
                T_Adj_Probability_Matrix(a,b) = ...
                Theo_Probability_Matrix(a,b)./T_Probability_length(b);
             end
@@ -136,7 +133,7 @@ for  D_L = 0.1:0.1:0.4
         for a = 1:1:levelCounter^2           
             for b = 1:1:levelCounter^2            
                 S_Error_Matrix(a,b) = ...
-                    S_Error_Input_Matrix(b,a)*Input_Matrix(a)/bitLength;
+                    S_Error_Input_Matrix(b,a)*inputMatrix(a)/bitLength;
                 T_Error_Matrix(a,b) = ...
                   T_Error_Input_Matrix(b,a)*T_Probability_length(a)/bitLength;            
             end
@@ -151,11 +148,11 @@ for  D_L = 0.1:0.1:0.4
                                 .* T_Adj_Probability_Matrix));
         % ---------------------------------------------------------------------
 
-        for c = 1:1:length(Decoded)       
+        for c = 1:1:bitLength       
             for a = 1:1:levelCounter^2            
                 for b = 1:1:levelCounter^2
                     T_Enput(a,b) = T_Probability_length(a)/bitLength*T_Adj_Probability_Matrix(b,a);
-                    S_Enput(a,b) =  Input_Matrix(a)/bitLength*S_Adj_Probability_Matrix(b,a);                         
+                    S_Enput(a,b) =  inputMatrix(a)/bitLength*S_Adj_Probability_Matrix(b,a);                         
                 end
             end
         end
@@ -171,7 +168,7 @@ for  D_L = 0.1:0.1:0.4
                 T_H_Y(a) = - T_P_Y_adj(a)*mylog2(T_P_Y_adj(a));         
         end
 
-        S_Adj_Input = Input_Matrix./bitLength;
+        S_Adj_Input = inputMatrix./bitLength;
         T_Adj_Input = T_Probability_length./bitLength;
 
         S_Adj_H_Y = sum(S_H_Y);
