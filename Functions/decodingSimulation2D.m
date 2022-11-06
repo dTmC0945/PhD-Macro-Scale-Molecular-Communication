@@ -7,7 +7,6 @@ function [inputMatrix, probabilityMatrix, dataPoints] = decodingSimulation2D(lev
     Alphabet            = zeros(levelCounter, levelCounter);       % Alpabet    
     inputMatrix         = zeros(0 + 1, levelCounter^2 + 1);
     probabilityMatrix   = zeros(levelCounter^2 + 1, levelCounter^2 + 1);
-
     
     % Generating discrete received values from the transmission
 

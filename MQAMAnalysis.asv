@@ -9,14 +9,14 @@ addpath("./Functions")
 
 % Variables ---------------------------------------------------------------
 
-distance        = 1;                      % Transmission Distance (cm)
-advectiveFlow  = 0.1;                      % Diffusivity coefficient (cm^2/s)
-mass            = 1;                        % Injected mass (kg)
+distance        = 1;                % Transmission Distance (cm)
+advectiveFlow  = 0.1;               % Diffusivity coefficient (cm^2/s)
+mass            = 1;                % Injected mass (kg)
 radialDiffusion = 1e-5;
-bitLength       = 1000;                      % Transmitted Random bit length
-symbolDuration  = 20;                       % Bit duration (counter) (sec)
-detectorRadius  = 0.3;
-levelIterator   = 1;
+bitLength       = 1000;             % Transmitted Random bit length
+symbolDuration  = 20;               % Bit duration (counter) (sec)
+detectorRadius  = 0.03;             % Radius of the inlet (detector) (m)
+levelIterator   = 1;                
 levelCounter    = 2;
 
 % loop parameters ---------------------------------------------------------
@@ -256,11 +256,11 @@ xlim([0.5 3.5])
 
 subtightplot(3,3,[1 2],[0.01,0.01],0.10,0.15)
 nbins = 150;
-h1 = histogram(Kr(1,:),nbins,'EdgeColor', 'none','FaceColor', [51 77 92]/255,'FaceAlpha',1)
+h1 = histogram(plotReal(1,:),nbins,'EdgeColor', 'none','FaceColor', [51 77 92]/255,'FaceAlpha',1)
 hold on
-h2 = histogram(Kr(2,:),nbins,'EdgeColor','none','FaceColor', [69 178 157]/255,'FaceAlpha',1)
+h2 = histogram(plotReal(2,:),nbins,'EdgeColor','none','FaceColor', [69 178 157]/255,'FaceAlpha',1)
 hold on
-h3 = histogram(Kr(3,:),nbins,'EdgeColor', 'none','FaceColor', [239 201 76]/255,'FaceAlpha',1)
+h3 = histogram(plotReal(3,:),nbins,'EdgeColor', 'none','FaceColor', [239 201 76]/255,'FaceAlpha',1)
 hold on
 h4 = histogram(Kr(4,:),nbins,'EdgeColor', 'none','FaceColor', [226 122 63]/255,'FaceAlpha',1)
 %set(gca,'visible','off')
