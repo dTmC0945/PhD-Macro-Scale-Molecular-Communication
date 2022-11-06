@@ -9,13 +9,13 @@ addpath("./Functions")
 
 % Variables ---------------------------------------------------------------
 
-x           = 1;                      % Transmission Distance (cm)
-v           = 0.1;                      % Diffusivity coefficient (cm^2/s)
-M           = 1;                        % Injected mass (kg)
-D_R         = 1e-5;
-bitLength   = 1000;                      % Transmitted Random bit length
-symbolDuration = 20;                       % Bit duration (counter) (sec)
-r           = 0.3;
+distance        = 1;                      % Transmission Distance (cm)
+advectiveFlow  = 0.1;                      % Diffusivity coefficient (cm^2/s)
+mass            = 1;                        % Injected mass (kg)
+radialDiffusion = 1e-5;
+bitLength       = 1000;                      % Transmitted Random bit length
+symbolDuration  = 20;                       % Bit duration (counter) (sec)
+detectorRadius  = 0.3;
 levelIterator   = 1;
 levelCounter    = 2;
 
@@ -33,6 +33,8 @@ S_Error         = zeros(l_max./l_mid+1 ,3);   % Error
 T_Error         = zeros(l_max./l_mid+1 ,3);   % Error
 T_Correct       = zeros(l_max./l_mid+1 ,3);   % Error
 S_Correct       = zeros(l_max./l_mid+1 ,3);   % Error
+plotReal        = zeros(levelCounter^2, bitLength);
+plotImag        = zeros(levelCounter^2, bitLength);
 
 % -------------------------------------------------------------------------
 
@@ -72,11 +74,13 @@ for  D_L = 0.1:0.1:0.4
         [bitSequence2, ...
          bitRepetition2]     = splitter(randomBits2);
 
-        CmP = transmission2D(D_R, D_L, v, x, r,...
+        CmP = transmission2D(radialDiffusion, D_L, advectiveFlow, ...
+                             distance, detectorRadius,...
                              bitSequence1, bitRepetition1,...
                              symbolDuration);
         
-        CmQ = transmission2D(D_R, D_L, v, x, r,...
+        CmQ = transmission2D(radialDiffusion, D_L, advectiveFlow, ...
+                             distance, detectorRadius,...
                              bitSequence2, bitRepetition2,...
                              symbolDuration);
 
@@ -96,7 +100,7 @@ for  D_L = 0.1:0.1:0.4
         
         T_Prob = decodingTheory2D(levelCounter, Es_N0);
 
-        [inputMatrix, probabilityMatrix, Rn] = decodingSimulation2D(levelCounter, bitLength, symbolDuration, noisedSignal, normal, randomBits1, randomBits2);
+        [inputMatrix, probabilityMatrix, dataPoints] = decodingSimulation2D(levelCounter, bitLength, symbolDuration, noisedSignal, normal, randomBits1, randomBits2);
 
         % Check values for the probability matrix and the input matrix
         % Both of them must equal to 1
@@ -194,8 +198,8 @@ for  D_L = 0.1:0.1:0.4
 
     end
     
-     Kr(levelIterator,:) = real(Rn);
-     Ki(levelIterator,:) = imag(Rn);   
+     plotReal(levelIterator,:) = real(dataPoints);
+     plotImag(levelIterator,:) = imag(dataPoints);   
      
     levelIterator = levelIterator + 1;
     
@@ -206,13 +210,13 @@ figure
 subtightplot(3,3,[4 5 7 8],[0.01,0.01],0.15,0.15)
 
 
-scatter(Kr(1,:),Ki(1,:),'filled','MarkerEdgeColor', [51 77 92]/255,'MarkerFaceColor', [51 77 92]/255)
+scatter(plotReal(1,:),plotImag(1,:),'filled','MarkerEdgeColor', [51 77 92]/255,'MarkerFaceColor', [51 77 92]/255)
 hold on
-scatter(Kr(2,:),Ki(2,:),'filled','MarkerEdgeColor', [69 178 157]/255,'MarkerFaceColor', [69 178 157]/255)
+scatter(plotReal(2,:),plotImag(2,:),'filled','MarkerEdgeColor', [69 178 157]/255,'MarkerFaceColor', [69 178 157]/255)
 hold on
-scatter(Kr(3,:),Ki(3,:),'filled','MarkerEdgeColor', [239 201 76]/255,'MarkerFaceColor', [239 201 76]/255)
+scatter(plotReal(3,:),plotImag(3,:),'filled','MarkerEdgeColor', [239 201 76]/255,'MarkerFaceColor', [239 201 76]/255)
 hold on
-scatter(Kr(4,:),Ki(4,:),'filled','MarkerEdgeColor', [226 122 63]/255,'MarkerFaceColor', [226 122 63]/255)
+scatter(plotReal(4,:),plotImag(4,:),'filled','MarkerEdgeColor', [226 122 63]/255,'MarkerFaceColor', [226 122 63]/255)
 
 % Nice plot code ----------------------------------------------------------
 
