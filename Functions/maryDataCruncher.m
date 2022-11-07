@@ -1,4 +1,4 @@
-function Output = dataCruncher(filename)
+function Output = maryDataCruncher(filename)
 
 % This function reads the experimental data saved in an excel function.
 

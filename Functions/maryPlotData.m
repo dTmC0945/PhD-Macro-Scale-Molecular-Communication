@@ -1,4 +1,4 @@
-function plotData(mod, expData, Cm, iT, Tt, offset, min, mid, max, xmax, ymax)
+function maryPlotData(mod, expData, Cm, iT, Tt, offset, min, mid, max, xmax, ymax)
 
 % -------------------------------------------------------------------------
 % Function which prints the experimental data and the theoretical data in
