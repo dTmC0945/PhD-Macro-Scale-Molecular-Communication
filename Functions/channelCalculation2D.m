@@ -1,5 +1,10 @@
 function [outputArg1,outputArg2] = channelCalculation2D(inputArg1,inputArg2)
-
+S_I_XY          = zeros(l_max./l_mid+1 ,3);   % Error
+T_I_XY          = zeros(l_max./l_mid+1 ,3);   % Error
+S_Error         = zeros(l_max./l_mid+1 ,3);   % Error    
+T_Error         = zeros(l_max./l_mid+1 ,3);   % Error
+T_Correct       = zeros(l_max./l_mid+1 ,3);   % Error
+S_Correct       = zeros(l_max./l_mid+1 ,3);   % Error
      
 
         % Generation the amount of input a single output received.
