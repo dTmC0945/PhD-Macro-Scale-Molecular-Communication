@@ -213,7 +213,9 @@ set(gca,'xticklabel',{[]})
 
 subtightplot(3,3,[6 9],[0.01,0.01],0.15,0.10)
 nbins = 150;
-h5 = histogram(plotImag(1,:),nbins,'EdgeColor', 'none','FaceColor', [51 77 92]/255,'FaceAlpha',1)
+h5 = histogram(plotImag(1,:),nbins, ...
+               'EdgeColor', 'none', ...
+               'FaceAlpha', 1)
 hold on
 h6 = histogram(plotImag(2,:),nbins,'EdgeColor','none','FaceColor', [69 178 157]/255,'FaceAlpha',1)
 hold on
@@ -239,9 +241,10 @@ set(gca, ...
   'YMinorGrid'  , 'on'      , ...
   'Box'         , 'off'      , ...
   'LineWidth'   , 1.2         );
-set(gca,'CameraUpVector',[1,0,0]);
+
+set(gca, 'CameraUpVector',[1,0,0]);
 set(gca, 'XDir','reverse')
-set(gca,'xticklabel',{[]})
+set(gca, 'xticklabel',{[]})
 
 %set(gca,'yticklabel',{[]})
 %set(gca,'visible','off')
