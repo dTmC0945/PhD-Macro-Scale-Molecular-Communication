@@ -11,7 +11,13 @@ clc
 
 addpath("./Functions")
 
-% -------------------------------------------------------------------------
+% Noise Parameters --------------------------------------------------------
+
+mu_a    = 1.21*10^-3;              % Mean
+    
+sigma_a = sqrt(0.0960*10^-6);   % Standard deviation
+
+% Data Reading ------------------------------------------------------------
 
 A = xlsread('Bulk_Data_Q.xlsx');
 
@@ -35,11 +41,16 @@ end
 
 % Adjustments for no data points ------------------------------------------
 
-%P1250(297) = (P1250(301) + P1250(293))/2;
-%P1250(298) = (P1250(302) + P1250(294))/2;
-%P1250(299) = (P1250(303) + P1250(295))/2;
-%P1250(300) = (P1250(304) + P1250(296))/2;
-%P2000(174) = (P2000(173) + P2000(175))/2;
+experimentalSignal(4, 297) = (experimentalSignal(4, 301) ...
+                           +  experimentalSignal(4, 293))/2;
+experimentalSignal(4, 298) = (experimentalSignal(4, 302) ...
+                           +  experimentalSignal(4, 294))/2;
+experimentalSignal(4, 299) = (experimentalSignal(4, 303) ...
+                           +  experimentalSignal(4, 295))/2;
+experimentalSignal(4, 300) = (experimentalSignal(4, 304) ...
+                           +  experimentalSignal(4, 296))/2;
+experimentalSignal(7, 173) = (experimentalSignal(7, 173) ...
+                           +  experimentalSignal(7, 175))/2;
 
 % -------------------------------------------------------------------------
                    
@@ -110,7 +121,9 @@ for i = 1:1:9
     signalLegendText2{i} = join(compose("%d ml/min", i*500 + 250));
 end
 
-set(legend(signalLegendText2),'Interpreter','Latex','Location','Northwest')
+set(legend(signalLegendText2), ...
+          'Interpreter' , 'Latex', ...
+          'Location'    , 'Northwest')
 
 xlim([0 480]); ylim([0 0.8]);
 
@@ -132,13 +145,7 @@ x_e = x;
 x_d = x;
 m = 2.4;
 
-% Noise Parameters ========================================================
 
-mu_a = 1.21*10^-3;              % Mean
-    
-sigma_a = sqrt(0.0960*10^-6);   % Standard deviation
-
-% =========================================================================
 
 for i = 1:1:300
     
