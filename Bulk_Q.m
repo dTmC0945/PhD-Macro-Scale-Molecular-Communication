@@ -1,20 +1,36 @@
+% ========================= BEGIN CODE ====================================
+
+% -------------------------------------------------------------------------
+% -- Bulk Flow Analysis by Daniel T. McGuiness ----------------------------
+% -------------------------------------------------------------------------
+
 clear variables
 clc
-
 
 % Function Paths ----------------------------------------------------------
 
 addpath("./Functions")
 
+% -------------------------------------------------------------------------
+
 A = xlsread('Bulk_Data_Q.xlsx');
 
+% Memory Allocation -------------------------------------------------------
+
+experimentalSignalEnergy        = zeros(1, 19);
+experimentalSignal              = zeros(19, 481);
+experimentalVariance            = zeros(1, 19);
+experimentalMaximumAmplitude    = zeros(1, 19);
+x_label                         = zeros(1, 19);
+
+% -------------------------------------------------------------------------
 
 for i = 1:1:19
-    experimentalSignal(i,:) = A(i,:)* 10^9;
+    experimentalSignal(i,:)         = A(i,:)* 10^9;
     experimentalMaximumAmplitude(i) = max(experimentalSignal(i,:));
-    experimentalVariance(i) = var(experimentalSignal(i,90:390));
-    experimentalSignalEnergy(i) = sum(abs(experimentalSignal(i,1:450)).^2);
-    x_label(i) = 500 + 250*(i-1);
+    experimentalVariance(i)         = var(experimentalSignal(i,90:390));
+    experimentalSignalEnergy(i)     = sum(abs(experimentalSignal(i,1:450)).^2);
+    x_label(i)                      = 500 + 250*(i-1);
 end
 
 % Adjustments for no data points ------------------------------------------
@@ -38,29 +54,30 @@ xlim([0 480]);  ylim([0 1.2]);
 
 % Nice plot code ----------------------------------------------------------
 
-set(gca,'TickLabelInterpreter', 'latex');
 set(gca, ...
-  'Fontsize'    , 15        , ...
-  'TickDir'     , 'out'      , ...
-  'YGrid'       , 'on'      , ...
-  'GridLineStyle','--'      , ...
-  'TickLength'  , [.02 .02] , ...
-  'XMinorTick'  , 'on'      , ...
-  'YMinorTick'  , 'on'      , ...
-  'XTick'       ,0:60:480   , ...
-  'Box'         , 'off'      , ...
-  'LineWidth'   , 1.2         );
+  'TickLabelInterpreter', 'latex'   , ...
+  'Fontsize'            , 15        , ...
+  'TickDir'             , 'out'     , ...
+  'YGrid'               , 'on'      , ...
+  'GridLineStyle'       , '--'      , ...
+  'TickLength'          , [.02 .02] , ...
+  'XMinorTick'          , 'on'      , ...
+  'YMinorTick'          , 'on'      , ...
+  'XTick'               , 0:60:480  , ...
+  'Box'                 , 'off'     , ...
+  'LineWidth'           , 1.2       );
 
 % -------------------------------------------------------------------------
 
-xlabel('Time [s]','Interpreter','Latex')
+xlabel('Time [s]'           ,'Interpreter','Latex')
 ylabel('Signal Current [nA]','Interpreter','Latex')
 
 for i = 1:1:9
     signalLegendText1{i} = join(compose("%d ml/min", i*500));
 end
        
-set(legend(signalLegendText1),'Interpreter','Latex','Location','Northwest')
+set(legend(signalLegendText1),'Interpreter' ,'Latex', ...
+                              'Location'    ,'Northwest')
 
 figure
 
@@ -95,9 +112,7 @@ end
 
 set(legend(signalLegendText2),'Interpreter','Latex','Location','Northwest')
 
-
 xlim([0 480]); ylim([0 0.8]);
-
 
 figure
 
@@ -176,60 +191,50 @@ end
 x_axis_theo = 0.1:0.1:30;
 x_axis_exp  = 3:1:21;
 
-theo_data_amp = [max(CmA(30,:))  max(CmA(40,:))  max(CmA(50,:))  ...
-                     max(CmA(60,:))  max(CmA(70,:))  max(CmA(80,:))  ...
-                     max(CmA(90,:))  max(CmA(100,:)) max(CmA(110,:)) ...
-                     max(CmA(120,:)) max(CmA(130,:)) max(CmA(140,:)) ...
-                     max(CmA(150,:)) max(CmA(160,:)) max(CmA(170,:)) ...
-                     max(CmA(180,:)) max(CmA(190,:)) max(CmA(200,:)) ...
-                     max(CmA(210,:))];
+for i = 1:1:19
+    theoreticalAmplitude(i) = max(CmA(20 + 10*i, :));
+    theoreticalSignalEnergy(i) = sum(abs(transpose(CmA(20 + 10*i, :)).^2));
+end
 
-corr_amp = corrcoef( theo_data_amp,   max_amp_exp);             
+%corr_amp = corrcoef( theo_data_amp,   max_amp_exp);             
 max_amp_theo = max(transpose(CmA));
 
-plot(x_axis_exp, max_amp_exp,   'o',  'Linewidth'         ,    1.2,...
-                          'MarkerFaceColor'   ,[0    0.4470    0.7410],...
-                          'MarkerEdgeColor'   ,[0    0.4470    0.7410])
+%plot(x_axis_exp, max_amp_exp,   'o',  'Linewidth'         ,    1.2,...
+%                          'MarkerFaceColor'   ,[0    0.4470    0.7410],...
+%                          'MarkerEdgeColor'   ,[0    0.4470    0.7410])
 hold on
 plot(x_axis_theo, max_amp_theo,'Linewidth',2)
 
 % Nice plot code ----------------------------------------------------------
 
-set(gca,'TickLabelInterpreter', 'latex');
 set(gca, ...
-  'Fontsize'    , 15        , ...
-  'TickDir'     , 'out'      , ...
-  'YGrid'       , 'on'      , ...
-  'GridLineStyle','--'      , ...
-  'TickLength'  , [.02 .02] , ...
-  'XMinorTick'  , 'on'      , ...
-  'YMinorTick'  , 'on'      , ...
-  'YScale'      , 'log'     , ...
-  'Box'         , 'off'      , ...
-  'LineWidth'   , 1.2         );
+  'TickLabelInterpreter', 'latex'   , ...
+  'Fontsize'            , 15        , ...
+  'TickDir'             , 'out'     , ...
+  'YGrid'               , 'on'      , ...
+  'GridLineStyle'       , '--'      , ...
+  'TickLength'          , [.02 .02] , ...
+  'XMinorTick'          , 'on'      , ...
+  'YMinorTick'          , 'on'      , ...
+  'YScale'              , 'log'     , ...
+  'Box'                 , 'off'     , ...
+  'LineWidth'           , 1.2       );
 
 % -------------------------------------------------------------------------
 xlim([1 29])
 xticks([1 5 9 13 17 21 25 29])
 xticklabels({'0','1000','2000', '3000','4000','5000','6000','7000'})
 
-xlabel('Carrier Flow [ml/min]','Interpreter','Latex')
-ylabel('Signal Current [nA]','Interpreter','Latex')
+xlabel('Carrier Flow [ml/min]'  ,'Interpreter','Latex')
+ylabel('Signal Current [nA]'    ,'Interpreter','Latex')
 
-P = legend('Experimental Results','Theoretical Model');
-
-set(P,'Interpreter','Latex','Location','Northeast')
+set(legend('Experimental Results', 'Theoretical Model'),...
+           'Interpreter','Latex' , ...
+           'Location'   ,'Northeast')
 
 % Signal Energy Analysis ==================================================
 
 figure
-
-Energy_Theory = sum(abs(transpose(CmA).^2));
-
-theo_data_energy = [Energy_Theory(30)  Energy_Theory(40) Energy_Theory(50) ...
-    Energy_Theory(60) Energy_Theory(70) Energy_Theory(80) Energy_Theory(90) ...
-    Energy_Theory(100) Energy_Theory(110) Energy_Theory(120) Energy_Theory(130) ...
-    Energy_Theory(140) Energy_Theory(150) Energy_Theory(160) Energy_Theory(170) Energy_Theory(180) Energy_Theory(190) Energy_Theory(200) Energy_Theory(210)];
 
 corr_eng = corrcoef(theo_data_energy, Energy);
 
@@ -263,9 +268,9 @@ xlim([1 29])
 xticks([1 5 9 13 17 21 25 29])
 xticklabels({'0','1000','2000', '3000','4000','5000','6000','7000'})
 
-K = legend('Experimental Results','Theoretical Model');
-
-set(K,'Interpreter','Latex','Location','Northeast')
+set(legend('Experimental Results', 'Theoretical Model'),...
+           'Interpreter','Latex' , ...
+           'Location'   ,'Northeast')
 
 figure
 
@@ -301,44 +306,23 @@ set(gca, ...
 
 % -------------------------------------------------------------------------
 
-xlabel('Carrier Flow [ml/min]','Interpreter','Latex')
-ylabel('Signal-to-Noise ratio [dB]','Interpreter','Latex')
+xlabel('Carrier Flow [ml/min]'      ,'Interpreter','Latex')
+ylabel('Signal-to-Noise ratio [dB]' ,'Interpreter','Latex')
 
 xlim([1 29])
 xticks([1 5 9 13 17 21 25 29])
 xticklabels({'0','1000','2000', '3000','4000','5000','6000','7000'})
 
-
-K = legend('Experimental Results','Theoretical Model');
-
-set(K,'Interpreter','Latex','Location','Northeast')
+set(legend('Experimental Results', 'Theoretical Model'),...
+           'Interpreter','Latex' , ...
+           'Location'   ,'Northeast')
 
 figure
 
-COR_1   = corrcoef(P0500(1:458),P0750(1:458));
-COR_2   = corrcoef(P0500(1:458),P1000(1:458));
-COR_3   = corrcoef(P0500(1:458),P1250(1:458));
-COR_4   = corrcoef(P0500(1:458),P1500(1:458));
-COR_5   = corrcoef(P0500(1:458),P1750(1:458));
-COR_6   = corrcoef(P0500(1:458),P2000(1:458));
-COR_7   = corrcoef(P0500(1:458),P2250(1:458));
-COR_8   = corrcoef(P0500(1:458),P2500(1:458));
-COR_9   = corrcoef(P0500(1:458),P2750(1:458));
-COR_10  = corrcoef(P0500(1:458),P3000(1:458));
-COR_11  = corrcoef(P0500(1:458),P3250(1:458));
-COR_12  = corrcoef(P0500(1:458),P3500(1:458));
-COR_13  = corrcoef(P0500(1:458),P3750(1:458));
-COR_14  = corrcoef(P0500(1:458),P4000(1:458));
-COR_15  = corrcoef(P0500(1:458),P4250(1:458));
-COR_16  = corrcoef(P0500(1:458),P4500(1:458));
-COR_17  = corrcoef(P0500(1:458),P4750(1:458));
-COR_18  = corrcoef(P0500(1:458),P5000(1:458));
-
-COR = [COR_1(1,2) COR_2(1,2) COR_3(1,2) COR_4(1,2) ...
-       COR_5(1,2) COR_6(1,2) COR_7(1,2) COR_8(1,2) ...
-       COR_9(1,2) COR_10(1,2) COR_11(1,2) COR_12(1,2) ...
-       COR_13(1,2) COR_14(1,2) COR_15(1,2) COR_16(1,2) ...
-       COR_17(1,2) COR_18(1,2)];
+for i = 2:1:19
+    correlation = findCorrelation(experimentalSignal(1,1:458), ...
+                                  experimentalSignal(i,1:458));
+end
 
 figure  
 
@@ -368,7 +352,7 @@ xlim([500 5000])
 
 figure
 
-plot(COR,'o','Linewidth',1.2,'MarkerFaceColor',[0    0.4470    0.7410],'MarkerEdgeColor',[0    0.4470    0.7410])
+plot(correlation,'o','Linewidth',1.2,'MarkerFaceColor',[0    0.4470    0.7410],'MarkerEdgeColor',[0    0.4470    0.7410])
 hold on
 
 % Nice plot code ----------------------------------------------------------
