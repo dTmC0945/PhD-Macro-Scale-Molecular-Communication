@@ -10,6 +10,7 @@ clc
 % Function Paths ----------------------------------------------------------
 
 addpath("./Functions")
+addpath("./Experimental Data")
 
 % Parameters --------------------------------------------------------------
  
@@ -23,23 +24,28 @@ sigma_a         = sqrt(0.0960*10^-6);   % Standard deviation
 
 % Data Reading ------------------------------------------------------------
 
-A = xlsread('Bulk_Data_Q.xlsx');
+A = xlsread('BulkFlowExperimentalData.xlsx');
 
 % Memory Allocation -------------------------------------------------------
 
-correlation                     = zeros(1, 19);
-experimentalSignalEnergy        = zeros(1, 19);
-experimentalSignal              = zeros(19, 450);
-experimentalVariance            = zeros(1, 19);
-experimentalMaximumAmplitude    = zeros(1, 19);
-discreteTheoreticalSNR          = zeros(1, 19);
-theoreticalAmplitude            = zeros(1, 19);
-theoreticalSignalEnergy         = zeros(1, 19);
-discreteTheoreticalSignalEnergy = zeros(1, 19);
-CmNoised                        = zeros(300, 500);
+correlation                         = zeros(1, 19);
 
-signalLegendText1               = cell(1, 9);
-signalLegendText2               = cell(1, 9);
+experimentalSignalEnergy            = zeros(1, 19);
+experimentalSignal                  = zeros(19, 450);
+experimentalVariance                = zeros(1, 19);
+experimentalMaximumAmplitude        = zeros(1, 19);
+
+theoreticalSignal                   = zeros(1, 300);
+theoreticalSignalEnergy             = zeros(1, 19);
+
+discreteTheoreticalMaximumAmplitude = zeros(1,19);
+discreteTheoreticalSignalEnergy     = zeros(1, 19);
+discreteTheoreticalSNR              = zeros(1, 19);
+
+CmNoised                            = zeros(300, 500);
+
+signalLegendText1                   = cell(1, 9);
+signalLegendText2                   = cell(1, 9);
 
 % Adjustments for NaN data points ------------------------------------------
 
@@ -120,7 +126,7 @@ set(gca, ...
 
 % -------------------------------------------------------------------------
 
-xlabel('Time [s]','Interpreter','Latex')
+xlabel('Time [s]'           ,'Interpreter','Latex')
 ylabel('Signal Current [nA]','Interpreter','Latex')
 
 for i = 1:1:9
@@ -139,39 +145,41 @@ figure
 
 for i = 1:1:300
     
-    v = i/1000; 
+    advectiveFlow   = i/1000; 
     
-    Em = mass*expint(v*distance/diffusion);
+    adjustedMass    = mass*expint(advectiveFlow*distance/diffusion);
     
-    message = [0 0 1  0]*Em;
-    k  =      [0 11 28 11];
+    bitSequence     = [0 0  1  0]*adjustedMass;
+    bitRepetition   = [0 11 28 11];
 
 
-    Cm = transmission(diffusion, v, distance, message, k, symbolDuration);
+    Cm              = transmission(diffusion, advectiveFlow, distance, ...
+                                   bitSequence, bitRepetition, ...
+                                    symbolDuration);
 
-    CmNoised(i,:) = addNoise(Cm, mu_a, sigma_a);          
+    CmNoised(i,:)   = addNoise(Cm, mu_a, sigma_a);          
 
 end
 
-x_axis_theo = 0.1:0.1:30;
-x_axis_exp  = 3:1:21;
+theoreticalXAxis    = 0.1:0.1:30;
+experimentalXAxis   = 3:1:21;
 
 for i = 1:1:19
-    theoreticalAmplitude(i) = max(CmNoised(20 + 10*i, :));
+    theoreticalSignal(i)        = max(CmNoised(20 + 10*i, :));
 end
 
 for i = 1:1:300
-    theoreticalSignalEnergy(i) = sum(abs(transpose(CmNoised(i, :)).^2));
+    theoreticalSignalEnergy(i)  = sum(abs(transpose(CmNoised(i, :)).^2));
 end
 
-%corr_amp = corrcoef( theo_data_amp,   max_amp_exp);             
-max_amp_theo = max(transpose(CmNoised));
+theoreticalMaximumAmplitude     = max(transpose(CmNoised));
 
-plot(x_axis_exp, experimentalMaximumAmplitude,   'o',  'Linewidth'         ,    1.2,...
-                          'MarkerFaceColor'   ,[0    0.4470    0.7410],...
+plot(experimentalXAxis, experimentalMaximumAmplitude,   'o', ...
+                          'LineWidth'         , 1.2, ...
+                          'MarkerFaceColor'   ,[0    0.4470    0.7410], ...
                           'MarkerEdgeColor'   ,[0    0.4470    0.7410])
 hold on
-plot(x_axis_theo, max_amp_theo,'Linewidth',2)
+plot(theoreticalXAxis, theoreticalMaximumAmplitude,'Linewidth',2)
 
 % Nice plot code ----------------------------------------------------------
 
@@ -204,12 +212,12 @@ xticklabels({'0', '1000', '2000', '3000', '4000', '5000', '6000', '7000'});
 
 figure
 
-plot(x_axis_exp, experimentalSignalEnergy,  'o',  ...
+plot(experimentalXAxis, experimentalSignalEnergy,  'o',  ...
                                             'LineWidth'         , 1.2, ...
                                             'MarkerFaceColor'   ,[0 0.4470 0.7410], ...
                                             'MarkerEdgeColor'   ,[0 0.4470 0.7410])
 hold on
-plot(x_axis_theo, theoreticalSignalEnergy,'Linewidth',2)
+plot(theoreticalXAxis, theoreticalSignalEnergy,'Linewidth',2)
 
 % Nice plot code ----------------------------------------------------------
 
@@ -246,20 +254,16 @@ experimentalSNR = 10*log10(experimentalSignalEnergy/sigma_a^2);
 theoreticalSNR  = 10*log10(theoreticalSignalEnergy /sigma_a^2);
 
 for i = 1:1:19
-    discreteTheoreticalSignalEnergy(i)  = theoreticalSignalEnergy(20 + 10*i);
-    discreteTheoreticalSNR(i)           = theoreticalSNR(20 + 10*i);
+    discreteTheoreticalMaximumAmplitude(i)  = theoreticalMaximumAmplitude(20 + 10*i);
+    discreteTheoreticalSignalEnergy(i)      = theoreticalSignalEnergy(20 + 10*i);
+    discreteTheoreticalSNR(i)               = theoreticalSNR(20 + 10*i);
 end
 
-correlationEnergy   = findCorrelation(experimentalSignalEnergy, ...
-                                      discreteTheoreticalSignalEnergy);
-correlationSNR      = findCorrelation(experimentalSNR, ...
-                                      discreteTheoreticalSNR);
-
-plot(x_axis_exp, experimentalSNR, 'o','Linewidth'         ,    1.2,...
+plot(experimentalXAxis, experimentalSNR, 'o','Linewidth'         ,    1.2,...
                           'MarkerFaceColor'   ,[0    0.4470    0.7410],...
                           'MarkerEdgeColor'   ,[0    0.4470    0.7410])
 hold on
-plot(x_axis_theo, theoreticalSNR,'Linewidth',2)
+plot(theoreticalXAxis, theoreticalSNR,'Linewidth',2)
 
 % Nice plot code ----------------------------------------------------------
 
@@ -289,8 +293,6 @@ set(legend('Experimental Results', 'Theoretical Model'),...
            'Location'   ,'Northeast')
 
 % Correlation of Experimental Signal Plot ---------------------------------
-
-figure
 
 for i = 1:1:19
     correlation(i) = findCorrelation(experimentalSignal(1,1:450), ...
@@ -324,7 +326,7 @@ set(gca, ...
 ylabel('$\rho(A, B)$','Interpreter','Latex')
 xlabel('Correlated pairs ($Q_{500},Q_n$)','Interpreter','Latex')
 
-% Theory Analysis =========================================================
+% Signal shape comparison -------------------------------------------------
 
 figure
 
@@ -337,27 +339,6 @@ for i = 1:1:5
     hold on
 
 end
-         
-
-
-%corrcoef(CmA(30,1:480),P0500(1:480))
-%corrcoef(CmA(40,1:480),P0750(1:480))
-%corrcoef(CmA(50,1:480),P1250(1:480))
-%corrcoef(CmA(60,1:480),P1500(1:480))
-%corrcoef(CmA(70,1:480),P1750(1:480))
-%corrcoef(CmA(80,1:480),P2000(1:480))
-%corrcoef(CmA(90,1:480),P2250(1:480))
-%corrcoef(CmA(100,1:480),P2500(1:480))
-%corrcoef(CmA(110,1:480),P2750(1:480))
-%corrcoef(CmA(120,1:480),P3000(1:480))
-%corrcoef(CmA(130,1:480),P3250(1:480))
-%corrcoef(CmA(140,1:460),P3500(1:460))
-%corrcoef(CmA(150,1:460),P3750(1:460))
-%corrcoef(CmA(160,1:460),P4000(1:460))
-%corrcoef(CmA(170,1:440),P4250(1:440))
-%corrcoef(CmA(180,1:460),P4500(1:460))
-%corrcoef(CmA(190,1:460),P4750(1:460))
-%corrcoef(CmA(200,1:460),P5000(1:460))
 
 % Nice plot code ----------------------------------------------------------
 
@@ -378,6 +359,8 @@ set(gca, ...
 xlabel('Time [s]','Interpreter','Latex')
 ylabel('Signal Current [nA]','Interpreter','Latex')
 
+xlim([0 450])
+
 P = legend('500 ml/min (T)'   ,'500 ml/min (E)' , ...
            '750 ml/min (T)'   ,'750 ml/min (E)' , ...
            '1000 ml/min (T)'  ,'1000 ml/min (E)' , ...
@@ -388,9 +371,9 @@ set(P,'Interpreter','Latex','Location','Northwest')
 
 figure
 
-for i = 6:1:11
+for i = 6:1:10
 
-    plot(CmNoised(20 + 10*i, :),        'LineWidth' ,    2  , ...
+    plot(CmNoised(20 + 10*i, :),   'LineWidth' ,    2  , ...
                                    'LineStyle' ,   '--')
     hold on
     plot(experimentalSignal(i, :), 'LineWidth' ,    2);
@@ -427,11 +410,11 @@ P = legend('1750 ml/min (T)'  ,'1750 ml/min (E)' , ...
 
 set(P,'Interpreter','Latex','Location','Northwest')
 
-xlim([0 450])
+xlim([0 450]); ylim([0 0.3]);
 
 figure
 
-for i = 12:1:16
+for i = 11:1:15
 
     plot(CmNoised(20 + 10*i, :),        'LineWidth' ,    2  , ...
                                    'LineStyle' ,   '--')
@@ -441,8 +424,7 @@ for i = 12:1:16
 
 end
 
-hold off
-            
+hold off          
             
 % Nice plot code ----------------------------------------------------------
 
@@ -462,7 +444,7 @@ set(gca, ...
 
 xlabel('Time [s]','Interpreter','Latex')
 ylabel('Signal Current [nA]','Interpreter','Latex')
-ylim([0 0.15])
+xlim([0 450]);  ylim([0 0.15]);
 
 P = legend('3000 ml/min (T)'  ,'3000 ml/min (E)' , ...
            '3250 ml/min (T)'  ,'3250 ml/min (E)' , ...
@@ -474,9 +456,9 @@ set(P,'Interpreter','Latex','Location','Northwest')
 
 figure
 
-for i = 17:1:19
+for i = 16:1:19
 
-    plot(CmNoised(20 + 10*i, :),        'LineWidth' ,    2  , ...
+    plot(CmNoised(20 + 10*i, :),   'LineWidth' ,    2  , ...
                                    'LineStyle' ,   '--')
     hold on
     plot(experimentalSignal(i, :), 'LineWidth' ,    2);
@@ -505,11 +487,22 @@ set(gca, ...
 xlabel('Time [s]','Interpreter','Latex')
 ylabel('Signal Current [nA]','Interpreter','Latex')
 
+xlim([0 450]); ylim([0 0.05]);
+
 P = legend('4250 ml/min (T)'  ,'4250 ml/min (E)' , ...
            '4500 ml/min (T)'  ,'4500 ml/min (E)' , ...
            '4750 ml/min (T)'  ,'4750 ml/min (E)' , ...
            '5000 ml/min (T)'  ,'5000 ml/min (E)');
 
 set(P,'Interpreter','Latex','Location','Northwest')
+
+% Correlation between theory and experiment -------------------------------
+
+correlationAmplitude= findCorrelation(experimentalMaximumAmplitude, ...
+                                      discreteTheoreticalMaximumAmplitude);
+correlationEnergy   = findCorrelation(experimentalSignalEnergy, ...
+                                      discreteTheoreticalSignalEnergy);
+correlationSNR      = findCorrelation(experimentalSNR, ...
+                                      discreteTheoreticalSNR);
 
 % ======================== END OF CODE ====================================
