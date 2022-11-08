@@ -6,7 +6,20 @@ clc
 addpath("./Functions")
 addpath("./Experimental Data")
 
-A = xlsread('kExperimentalData.xlsx');
+opts = detectImportOptions('kExperimentalData.xlsx');
+opts.DataRange = [1 Inf]; %rows;
+cols = length(opts.VariableNames); %finding number of columns;
+opts.SelectedVariableNames = [1, 1:cols];
+A = readtable('kExperimentalData.xlsx',opts);
+
+% Memory Allocation -------------------------------------------------------
+
+leftoverTheoretical = zeros(4,11);
+leftoverExperimentalAverage = zeros(4,11);
+leftoverExperimental = zeros(12,11);
+
+CmNoisedk = cell(4,1);
+kData     = cell(4,1);
 
 % Model Parameters --------------------------------------------------------
 
@@ -23,31 +36,29 @@ sigma_a = sqrt(0.0960*10^-6);   % Standard deviation
 
 % Experimental Values -----------------------------------------------------
 
-kExperimentalData = [A(1,15:end) ;  A(2,15:end) ;  A(3,15:end) ; ...
-                     A(5,15:end) ;  A(6,15:end) ;  A(7,15:end) ; ...
-                     A(9,15:end) ;  A(10,15:end);  A(11,15:end); ...
-                     A(13,15:end);  A(14,15:end);  A(15,15:end)];
+kExperimentalData = table2cell([A(2,15:end) ;  A(3,15:end) ;  A(4,15:end) ; ...
+                                 A(6,15:end) ;  A(7,15:end) ;  A(8,15:end) ; ...
+                                 A(10,15:end);  A(11,15:end);  A(12,15:end); ...
+                                 A(14,15:end);  A(15,15:end);  A(16,15:end)]);
 
 % k = 1 Analysis ----------------------------------------------------------
 
 bitSequence     = [0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0]*mass(1);
 bitRepetition   = [0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];
 
-Cmk1 = transmission(diffusion, advectiveFlow, ...
+Cm(1,:) = {transmission(diffusion, advectiveFlow, ...
                     distance, ....
                     bitSequence, bitRepetition, ...
-                    symbolDuration);
+                    symbolDuration)};
 
-CmNoisedk1 = addNoise(Cmk1, mu_a, sigma_a);            
+CmNoisedk(1,:) = {addNoise(cell2mat(Cm), mu_a, sigma_a)};            
 
-k1 = (kExperimentalData(1,:) ...
-    + kExperimentalData(2,:) ...
-    + kExperimentalData(3,:))/3;
-
+%k = cell2mat(kExperimentalData(1,:)) + cell2mat(kExperimentalData(2,:));
+p = mean(cell2mat(kExperimentalData(1:3,:)))
 figure
-plot(k1,'Linewidth',2)
+plot(cell2mat(k(1,:)),'Linewidth',2)
 hold on
-plot(CmNoisedk1,'Linewidth',2)
+plot(cell2mat(CmNoisedk(1,:)),'Linewidth',2)
 
 % Nice plot code ----------------------------------------------------------
 
@@ -87,16 +98,14 @@ Cmk2 = transmission(diffusion, advectiveFlow, ...
                     bitSequence, bitRepetition, ...
                     symbolDuration);
 
-CmNoisedk2 = addNoise(Cmk2, mu_a, sigma_a);            
+CmNoisedk(2,:) = {addNoise(Cmk2, mu_a, sigma_a)};            
 
-k2 = (kExperimentalData(4,:) ...
-    + kExperimentalData(5,:) ...
-    + kExperimentalData(6,:))/3;
+k{2} = sum([kExperimentalData{4:6}])/3;
 
 figure
-plot(k2,'Linewidth',2)
+plot(cell2mat(k(2,:)),'Linewidth',2)
 hold on
-plot(CmNoisedk2,'Linewidth',2)
+plot(cell2mat(CmNoisedk(2,:)),'Linewidth',2)
 
 % Nice plot code ----------------------------------------------------------
 
@@ -134,16 +143,14 @@ Cmk3 = transmission(diffusion, advectiveFlow, ...
                     bitSequence, bitRepetition, ...
                     symbolDuration);
 
-CmNoisedk3 = addNoise(Cmk3, mu_a, sigma_a);            
+CmNoisedk(3,:) = {addNoise(Cmk3, mu_a, sigma_a)};            
 
-k3 = (kExperimentalData(7,:) ...
-    + kExperimentalData(8,:) ...
-    + kExperimentalData(9,:))/3;
+k{3} = sum([kExperimentalData{7:9}])/3;
 
 figure
-plot(k3,'Linewidth',2)
+plot(cell2mat(k(3,:)),'Linewidth',2)
 hold on
-plot(CmNoisedk3,'Linewidth',2)
+plot(cell2mat(CmNoisedk(3,:)),'Linewidth',2)
 
 % Nice plot code ----------------------------------------------------------
 
@@ -184,16 +191,14 @@ Cmk4 = transmission(diffusion, advectiveFlow, ...
                     bitSequence, bitRepetition, ...
                     symbolDuration);
 
-CmNoisedk4 = addNoise(Cmk4, mu_a, sigma_a);            
+CmNoisedk(4,:) = {addNoise(Cmk4, mu_a, sigma_a)};            
 
-k4 = (kExperimentalData(10,:) ...
-    + kExperimentalData(11,:) ...
-    + kExperimentalData(12,:))/3;
+k{4} = sum([kExperimentalData{10:12}])/3;
 
 figure
-plot(k4,'Linewidth',2)
+plot(cell2mat(k(4,:)),'Linewidth',2)
 hold on
-plot(CmNoisedk4,'Linewidth',2)
+plot(cell2mat(CmNoisedk(4,:)),'Linewidth',2)
 
 % Nice plot code ----------------------------------------------------------
 
@@ -210,7 +215,7 @@ set(gca, ...
   'XTick'       ,80:80:420*4 ,...
   'LineWidth'   , 1.5         );
 % -------------------------------------------------------------------------
-xticks([0:80:420*4])
+xticks(0:80:420*4)
 xticklabels({'0','','','240','','','480','','','720','','','960','','','1200','','','1440','','','1680'})
 
 xlim([0 420*4])
@@ -222,13 +227,25 @@ xlabel('Transmission Time [s]','Interpreter','Latex')
 title({'$D$ = 0.15 $\mathrm{cm^2/s}$, $u_x$ = 0.17 $\mathrm{cm/s}$, $x_d$ = 2.5 $\mathrm{cm}$';' $M$ = 1.9 $\mathrm{ng}$, $\rho$ = 0.94'},'Interpreter','Latex','Fontsize',16)
 
 
+
 for t = 1:1:11
     
-    leftoverExperimentalAverage(:,t) = [k1(20 + 40*(t-1));
-                                        k2(40 + 80*(t-1));
-                                        k3(60 + 120*(t-1));
-                                        k4(80 + 160*(t-1))];
+    counter = 1;
 
+    for i = 1:1:4
+
+        leftoverTheoretical(i,t)            = CmNoisedk{i}(1,20*i + 40*i*(t-1));
+        leftoverExperimentalAverage(i,t)    = k{i}(1,20*i + 40*i*(t-1));
+
+        for j = 1:1:3
+            
+            leftoverExperimental(i*j,t)     = kExperimentalData{counter}(1,20*i + 40*i*(t-1));
+            
+            counter = counter + 1;
+        end
+    end
+
+    
     leftoverExperimental(:,t) = [kExperimentalData(1, 20 + 40 *(t-1)); ...
                                  kExperimentalData(2, 20 + 40 *(t-1)); ...
                                  kExperimentalData(3, 20 + 40 *(t-1)); ...
@@ -241,12 +258,11 @@ for t = 1:1:11
                                  kExperimentalData(10,80 + 160*(t-1)); ...
                                  kExperimentalData(11,80 + 160*(t-1)); ...
                                  kExperimentalData(12,80 + 160*(t-1))];
+    
 
-    leftoverTheoretical(:,t) = [CmNoisedk1(20 + 40 *(t-1)); ...
-                                CmNoisedk2(40 + 80 *(t-1)); ...
-                                CmNoisedk3(60 + 120*(t-1)); ...
-                                CmNoisedk4(80 + 160*(t-1))];
 end
+
+
 
 distance = 1:1:11;
 x3 = [1 2 3 4 5 7 8 9 10 11];
