@@ -8,15 +8,15 @@ addpath("./Experimental Data")
 
 A = xlsread('kExperimentalData.xlsx');
 
-% Model Parameters ========================================================
+% Model Parameters --------------------------------------------------------
 
-diffusion = 0.15; 
-advectiveFlow = 0.17; 
-distance = 2.5;      % Parameters
-mass = 0.6;
-symbolDuration      = 20; 
+diffusion       = 0.15; 
+advectiveFlow   = 0.17; 
+distance        = 2.5;      % Parameters
+mass            = [0.6, 0.9, 1.2, .19];
+symbolDuration  = 20; 
 
-% Noise Parameters ========================================================
+% Noise Parameters --------------------------------------------------------
 
 mu_a = 1.21*10^-3;              % Mean
 sigma_a = sqrt(0.0960*10^-6);   % Standard deviation
@@ -30,7 +30,7 @@ kExperimentalData = [A(1,15:end) ;  A(2,15:end) ;  A(3,15:end) ; ...
 
 % k = 1 Analysis ----------------------------------------------------------
 
-bitSequence     = [0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0]*mass;
+bitSequence     = [0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0]*mass(1);
 bitRepetition   = [0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];
 
 Cmk1 = transmission(diffusion, advectiveFlow, ...
@@ -44,6 +44,7 @@ k1 = (kExperimentalData(1,:) ...
     + kExperimentalData(2,:) ...
     + kExperimentalData(3,:))/3;
 
+figure
 plot(k1,'Linewidth',2)
 hold on
 plot(CmNoisedk1,'Linewidth',2)
@@ -67,7 +68,6 @@ set(gca, ...
 
 xlim([0 420])
 ylim([0 0.7])
-
 
 xticklabels({'0','','','60','','','120','','','180','','','240','','','300','','','360','','','420'})
 
@@ -113,7 +113,7 @@ set(gca, ...
   'XTick'       ,40:40:840 ,...
   'LineWidth'   , 1.5         );
 % -------------------------------------------------------------------------
-xticks([0:40:420*2])
+xticks(0:40:420*2)
 
 xticklabels({'0','','','120','','','240','','','360','','','480','','','600','','','720','','','840'})
 
@@ -127,57 +127,23 @@ set(k2_legend,'Interpreter','Latex','Location','Northeast')
 % K = 3 Analysis ==========================================================
 
 bitSequence = [0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0]*1.2;
-k  =      [0 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3];
+bitRepetition  = [0 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3];
 
-Tt      = 20; M_old   = 0; Ts      = 0; Q_neg   = 0; Cm      = 0;
+Cmk3 = transmission(diffusion, advectiveFlow, ...
+                    distance, ....
+                    bitSequence, bitRepetition, ...
+                    symbolDuration);
 
-for j = 2:1:length(bitSequence)
-        
-        if bitSequence(j) > bitSequence(j-1)
-            
-            M_old = Cm(end);
-            
-            for t = 1:1:k(j)*Tt
-                
-                Q(t) = M_old + (bitSequence(j) - bitSequence(j-1)) - ((bitSequence(j) - bitSequence(j-1))*(erf((distance-(t)*advectiveFlow)/(2*diffusion*sqrt(1/(diffusion*(t)))*(t))) + ...
-                                                                 erf((distance+(t)*advectiveFlow)/(2*diffusion*sqrt(1/(diffusion*(t)))*(t)))))/2 ;
-                    
-                Cm(t + Ts) = Q(t); 
-                
-            end
-            
-        else
-                M_r = Cm(end); 
-            
-            for t = 1:1:k(j)*Tt
-                
-                Q(t) = (abs(M_r - bitSequence(j)))*(erf((distance-(t)*advectiveFlow)/(2*diffusion*sqrt(1/(diffusion*(t)))*(t))) + ...
-                                                                 erf((distance+(t)*advectiveFlow)/(2*diffusion*sqrt(1/(diffusion*(t)))*(t))))/2 + bitSequence(j);
-                    
-                Cm(t + Ts) = Q(t); 
-                
-            end
-            
-        end
-        
-        Ts = k(j)*Tt + Ts;
-       
-end
-        
-WGN = transpose(sigma_a.*randn(length(Cm),1) + mu_a);    % Additive
-    
-Cm = Cm + WGN;     
+CmNoisedk3 = addNoise(Cmk3, mu_a, sigma_a);            
 
-L_T_3 = Cm;
-
-
-K_3 = (k_3_1 + k_3_2 + k_3_3)/3;
+k3 = (kExperimentalData(7,:) ...
+    + kExperimentalData(8,:) ...
+    + kExperimentalData(9,:))/3;
 
 figure
-
-plot(K_3,'Linewidth',2)
+plot(k3,'Linewidth',2)
 hold on
-plot(Cm,'Linewidth',2)
+plot(CmNoisedk3,'Linewidth',2)
 
 % Nice plot code ----------------------------------------------------------
 
@@ -197,7 +163,7 @@ set(gca, ...
 % -------------------------------------------------------------------------
 
 xlim([0 420*3])
-xticks([0:60:420*3])
+xticks(0:60:420*3)
 
 xticklabels({'0','','','180','','','360','','','540','','','720','','','900','','','1080','','','1260'})
 
@@ -210,58 +176,24 @@ set(k3_legend,'Interpreter','Latex','Location','Northeast')
 
 % K = 4 Analysis ==========================================================
 
-bitSequence = [0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0]*1.9;
-k  =      [0 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4];
+bitSequence     = [0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0]*1.9;
+bitRepetition   = [0 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4];
 
-Tt      = 20; M_old   = 0; Ts      = 0; Q_neg   = 0; Cm      = 0;
+Cmk4 = transmission(diffusion, advectiveFlow, ...
+                    distance, ....
+                    bitSequence, bitRepetition, ...
+                    symbolDuration);
 
-for j = 2:1:length(bitSequence)
-        
-        if bitSequence(j) > bitSequence(j-1)
-            
-            M_old = Cm(end);
-            
-            for t = 1:1:k(j)*Tt
-                
-                Q(t) = M_old + (bitSequence(j) - bitSequence(j-1)) - ((bitSequence(j) - bitSequence(j-1))*(erf((distance-(t)*advectiveFlow)/(2*diffusion*sqrt(1/(diffusion*(t)))*(t))) + ...
-                                                                 erf((distance+(t)*advectiveFlow)/(2*diffusion*sqrt(1/(diffusion*(t)))*(t)))))/2 ;
-                    
-                Cm(t + Ts) = Q(t); 
-                
-            end
-            
-        else
-                M_r = Cm(end); 
-            
-            for t = 1:1:k(j)*Tt
-                
-                Q(t) = (abs(M_r - bitSequence(j)))*(erf((distance-(t)*advectiveFlow)/(2*diffusion*sqrt(1/(diffusion*(t)))*(t))) + ...
-                                                                 erf((distance+(t)*advectiveFlow)/(2*diffusion*sqrt(1/(diffusion*(t)))*(t))))/2 + bitSequence(j);
-                    
-                Cm(t + Ts) = Q(t); 
-                
-            end
-            
-        end
-        
-        Ts = k(j)*Tt + Ts;
-       
-end
-        
-WGN = transpose(sigma_a.*randn(length(Cm),1) + mu_a);    % Additive
-    
-Cm = Cm + WGN;     
+CmNoisedk4 = addNoise(Cmk4, mu_a, sigma_a);            
 
-L_T_4 = Cm;
-
-
-K_4 = (k_4_1 + k_4_2 + k_4_3)/3;
+k4 = (kExperimentalData(10,:) ...
+    + kExperimentalData(11,:) ...
+    + kExperimentalData(12,:))/3;
 
 figure
-
-plot(K_4,'Linewidth',2)
+plot(k4,'Linewidth',2)
 hold on
-plot(Cm,'Linewidth',2)
+plot(CmNoisedk4,'Linewidth',2)
 
 % Nice plot code ----------------------------------------------------------
 
@@ -282,8 +214,6 @@ xticks([0:80:420*4])
 xticklabels({'0','','','240','','','480','','','720','','','960','','','1200','','','1440','','','1680'})
 
 xlim([0 420*4])
-
-
 
 k4_legend = legend('Experimental Results','Theoretical Model');
 set(k4_legend,'Interpreter','Latex','Location','Northeast')
