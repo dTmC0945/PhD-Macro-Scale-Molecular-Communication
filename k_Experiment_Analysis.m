@@ -224,55 +224,46 @@ title({'$D$ = 0.15 $\mathrm{cm^2/s}$, $u_x$ = 0.17 $\mathrm{cm/s}$, $x_d$ = 2.5 
 
 for t = 1:1:11
     
-    Leftover_E_1(t) = k1(20 + 40*(t-1));
-    Leftover_E_1_1(t) = k_1_1(20 + 40*(t-1));
-    Leftover_E_1_2(t) = k_1_2(20 + 40*(t-1));
-    Leftover_E_1_3(t) = k_1_3(20 + 40*(t-1));
-    
-    Leftover_E_2(t) = K_2(40 + 80*(t-1));
-    Leftover_E_2_1(t) = k_2_1(40 + 80*(t-1));
-    Leftover_E_2_2(t) = k_2_2(40 + 80*(t-1));
-    Leftover_E_2_3(t) = k_2_3(40 + 80*(t-1));
-    
-    Leftover_E_3(t) = K_3(60 + 120*(t-1));
-    Leftover_E_3_1(t) = k_3_1(60 + 120*(t-1));
-    Leftover_E_3_2(t) = k_3_2(60 + 120*(t-1));
-    Leftover_E_3_3(t) = k_3_3(60 + 120*(t-1));    
-    
-    Leftover_E_4(t) = K_4(80 + 160*(t-1));
-    Leftover_E_4_1(t) = k_4_1(80 + 160*(t-1));
-    Leftover_E_4_2(t) = k_4_2(80 + 160*(t-1));
-    Leftover_E_4_3(t) = k_4_3(80 + 160*(t-1)); 
-    
-    Leftover_T_1(t) = L_T_1(20 + 40*(t-1));
-    Leftover_T_2(t) = L_T_2(40 + 80*(t-1));
-    Leftover_T_3(t) = L_T_3(60 + 120*(t-1));
-    Leftover_T_4(t) = L_T_4(80 + 160*(t-1));
+    leftoverExperimentalAverage(:,t) = [k1(20 + 40*(t-1));
+                                        k2(40 + 80*(t-1));
+                                        k3(60 + 120*(t-1));
+                                        k4(80 + 160*(t-1))];
+
+    leftoverExperimental(:,t) = [kExperimentalData(1, 20 + 40 *(t-1)); ...
+                                 kExperimentalData(2, 20 + 40 *(t-1)); ...
+                                 kExperimentalData(3, 20 + 40 *(t-1)); ...
+                                 kExperimentalData(4, 40 + 80 *(t-1)); ...
+                                 kExperimentalData(5, 40 + 80 *(t-1)); ...
+                                 kExperimentalData(6, 40 + 80 *(t-1)); ...
+                                 kExperimentalData(7, 60 + 120*(t-1)); ...
+                                 kExperimentalData(8, 60 + 120*(t-1)); ...
+                                 kExperimentalData(9, 60 + 120*(t-1)); ...
+                                 kExperimentalData(10,80 + 160*(t-1)); ...
+                                 kExperimentalData(11,80 + 160*(t-1)); ...
+                                 kExperimentalData(12,80 + 160*(t-1))];
+
+    leftoverTheoretical(:,t) = [CmNoisedk1(20 + 40 *(t-1)); ...
+                                CmNoisedk2(40 + 80 *(t-1)); ...
+                                CmNoisedk3(60 + 120*(t-1)); ...
+                                CmNoisedk4(80 + 160*(t-1))];
 end
+
 distance = 1:1:11;
 x3 = [1 2 3 4 5 7 8 9 10 11];
 
-err_k_1 = range([Leftover_E_1_1 ; Leftover_E_1_2; Leftover_E_1_3])./2;
-err_k_2 = range([Leftover_E_2_1 ; Leftover_E_2_2; Leftover_E_2_3])./2;
-err_k_3 = range([Leftover_E_3_1 ; Leftover_E_3_2; Leftover_E_3_3])./2;
-err_k_4 = range([Leftover_E_4_1 ; Leftover_E_4_2; Leftover_E_4_3])./2;
+errBar  = [range([leftoverExperimental(1,:);  leftoverExperimental(2,:);  leftoverExperimental(3,:)]); ...
+           range([leftoverExperimental(4,:);  leftoverExperimental(5,:);  leftoverExperimental(6,:)]); ...
+           range([leftoverExperimental(7,:);  leftoverExperimental(8,:);  leftoverExperimental(9,:)]); ...
+           range([leftoverExperimental(10,:); leftoverExperimental(11,:); leftoverExperimental(12,:)])]./2;
 
-err_k_3(6) = [];
-Leftover_E_3(6) =[];
-
-CT_M = cbrewer('qual', 'Paired', 10);
-
+%err_k_3(6) = [];
+%Leftover_E_3(6) =[];
 
 figure
-
-plot(Leftover_T_1,'Linewidth',2 )
+for i = 1:1:4
+plot(leftoverTheoretical(i,:),'Linewidth',2 )
 hold on
-plot(Leftover_T_2,'Linewidth',2)
-hold on
-plot(Leftover_T_3,'Linewidth',2 )
-hold on
-plot(Leftover_T_4,'Linewidth',2  )
-hold on
+end
 he1 = errorbar(distance,Leftover_E_1,err_k_1,'o');
 hold on
 he2 = errorbar(distance,Leftover_E_2,err_k_2,'o');
