@@ -210,108 +210,146 @@ maryPlotData(8, M890(105:825), Cm890 , ...
          0 ,90 ,1080, ...
          length(Cm), 0.1)
 
+
 function maryPlotData(mod, expData, Cm, iT, Tt, offset, min, mid, max, xmax, ymax)
-    
-    % -------------------------------------------------------------------------
-    % Function which prints the experimental data and the theoretical data in
-    % comparison
-    % Parameters are
-    % mod: the modulation level of the transmission (2, 4, 8)
-    % expData: the experimental data
-    % Cm: theoretical data
-    % iT: the initial bit delay from experiments (empirical value)
-    % offset: the offset for the presented symbols (aestetics)
-    % min: low range of the x-axis ticks
-    % mid: the increments for the x-axis ticks
-    % max: the max value for the x-axis ticks
-    % xmax: the max value for the plot x-axis
-    % ymax: the max value for the plot y-axis
-    % -------------------------------------------------------------------------
-    
-    figure
-    
-    plot(expData*10^9,'Linewidth',2)
-    hold on
-    plot(Cm,'Linewidth',2)
-    
-    symbol  = length(Cm)/Tt;
-    bitData = zeros(1,symbol);
-    
-    message = [0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0];
-    k       = [0 1 1 2 2 1 1 1 1 4 2 1 1 1 2 3];
-    
-    op = 1;
-    
-    % This loop is to extract the transmitted symbols and arrange them based on
-    % the modulation level
-    
-    for j = 2:1:length(message)
-        while k(j) > 0
-            if message(j) == 0
-                bitData(op) = 0; op = op + 1; k(j) = k(j) - 1;
-            
-            elseif message(j) == 1
-                bitData(op) = 1; op = op + 1; k(j) = k(j) - 1;
-            end
+
+% -------------------------------------------------------------------------
+% Function which prints the experimental data and the theoretical data in
+% comparison
+% Parameters are
+% mod: the modulation level of the transmission (2, 4, 8)
+% expData: the experimental data
+% Cm: theoretical data
+% iT: the initial bit delay from experiments (empirical value)
+% offset: the offset for the presented symbols (aestetics)
+% min: low range of the x-axis ticks
+% mid: the increments for the x-axis ticks
+% max: the max value for the x-axis ticks
+% xmax: the max value for the plot x-axis
+% ymax: the max value for the plot y-axis
+% -------------------------------------------------------------------------
+
+figure
+
+plot(expData*10^9,'Linewidth',2)
+hold on
+plot(Cm,'Linewidth',2)
+
+symbol  = length(Cm)/Tt;
+bitData = zeros(1,symbol);
+
+message = [0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0];
+k       = [0 1 1 2 2 1 1 1 1 4 2 1 1 1 2 3];
+
+op = 1;
+
+% This loop is to extract the transmitted symbols and arrange them based on
+% the modulation level
+
+for j = 2:1:length(message)
+    while k(j) > 0
+        if message(j) == 0
+            bitData(op) = 0; op = op + 1; k(j) = k(j) - 1;
+        
+        elseif message(j) == 1
+            bitData(op) = 1; op = op + 1; k(j) = k(j) - 1;
         end
     end
-    
-    stringBitData = string(bitData);
-    
-    % These swicth cases allows to print the symbols correctly for each
-    % modulation level
-    
-    switch mod
-        case 2
-            for k = 0:1:symbol-1
-                text(iT + k*Tt, offset, stringBitData(k+1), ...
-                    'Fontsize', 16, 'Interpreter', 'Latex')
-                drawnow;
-            end
-    
-        case 4
-            for k = 0:1:symbol-1
-                text(iT + k*Tt, offset, append(stringBitData(2*k+1),  ...
-                                               stringBitData(2*k+2)), ...
-                                               'FontSize', 16,        ...
-                                               'Interpreter', 'Latex')
-                drawnow;
-            end
-    
-        case 8
-            for k = 0:1:symbol-1
-                text(iT + k*Tt, offset, append(stringBitData(2*k+1),  ...
-                                               stringBitData(2*k+2),  ...
-                                               stringBitData(2*k+3)), ...
-                                               'FontSize', 16,        ... 
-                                               'Interpreter', 'Latex')
-                drawnow;
-            end
-    end
-    
-    % Nice plot code ----------------------------------------------------------
-    
-    set(gca,'TickLabelInterpreter', 'latex');
-    set(gca, ...
-      'Fontsize'        ,   18          , ...
-      'TickDir'         ,   'out'       , ...
-      'YGrid'           ,   'on'        , ...
-      'GridLineStyle'   ,   '--'        , ...
-      'TickLength'      ,   [.02 .02]   , ...
-      'XTick'           ,   min:mid:max , ...
-      'Box'             ,   'off'       , ...
-      'XGrid'           ,   'on'        , ...
-      'LineWidth'       ,   1.2         );
-    
-    % ------------------------------------------------------------------------- 
-    
-    xticks(0:Tt:length(Cm))
-    
-    ylabel('Signal Current [nA]','Interpreter','Latex')
-    xlabel('Time [s]','Interpreter','Latex')
-    
-    xlim([0 xmax]); ylim([0 ymax])
-    
+end
+
+stringBitData = string(bitData);
+
+% These swicth cases allows to print the symbols correctly for each
+% modulation level
+
+switch mod
+    case 2
+        for k = 0:1:symbol-1
+            text(iT + k*Tt, offset, stringBitData(k+1), ...
+                'Fontsize', 16, 'Interpreter', 'Latex')
+            drawnow;
+        end
+
+    case 4
+        for k = 0:1:symbol-1
+            text(iT + k*Tt, offset, append(stringBitData(2*k+1),  ...
+                                           stringBitData(2*k+2)), ...
+                                           'FontSize', 16,        ...
+                                           'Interpreter', 'Latex')
+            drawnow;
+        end
+
+    case 8
+        for k = 0:1:symbol-1
+            text(iT + k*Tt, offset, append(stringBitData(2*k+1),  ...
+                                           stringBitData(2*k+2),  ...
+                                           stringBitData(2*k+3)), ...
+                                           'FontSize', 16,        ... 
+                                           'Interpreter', 'Latex')
+            drawnow;
+        end
+end
+
+% Nice plot code ----------------------------------------------------------
+
+set(gca,'TickLabelInterpreter', 'latex');
+set(gca, ...
+  'Fontsize'        ,   18          , ...
+  'TickDir'         ,   'out'       , ...
+  'YGrid'           ,   'on'        , ...
+  'GridLineStyle'   ,   '--'        , ...
+  'TickLength'      ,   [.02 .02]   , ...
+  'XTick'           ,   min:mid:max , ...
+  'Box'             ,   'off'       , ...
+  'XGrid'           ,   'on'        , ...
+  'LineWidth'       ,   1.2         );
+
+% ------------------------------------------------------------------------- 
+
+xticks(0:Tt:length(Cm))
+
+ylabel('Signal Current [nA]','Interpreter','Latex')
+xlabel('Time [s]','Interpreter','Latex')
+
+xlim([0 xmax]); ylim([0 ymax])
+
+end
+
+function Output = maryDataCruncher(filename)
+
+% This function reads the experimental data saved in an excel function.
+
+A = xlsread(filename);
+
+M2_ary_30_1 = A(1,:); M2_ary_30_2 = A(2,:); M2_ary_30_3 = A(3,:);
+M4_ary_30_1 = A(5,:); M4_ary_30_2 = A(6,:); M4_ary_30_3 = A(7,:);
+M8_ary_30_1 = A(9,:); M8_ary_30_2 = A(10,:); M8_ary_30_3 = A(11,:);
+
+M2_ary_60_1 = A(14,:); M2_ary_60_2 = A(15,:); M2_ary_60_3 = A(16,:);
+M4_ary_60_1 = A(18,:); M4_ary_60_2 = A(19,:); M4_ary_60_3 = A(20,:);
+M8_ary_60_1 = A(22,:); M8_ary_60_2 = A(23,:); M8_ary_60_3 = A(24,:);
+
+
+M2_ary_90_1 = A(27,:); M2_ary_90_2 = A(28,:); M2_ary_90_3 = A(29,:);
+M4_ary_90_1 = A(31,:); M4_ary_90_2 = A(32,:); M4_ary_90_3 = A(33,:);
+M8_ary_90_1 = A(35,:); M8_ary_90_2 = A(36,:); M8_ary_90_3 = A(37,:);
+
+M230 = (M2_ary_30_1 + M2_ary_30_2 + M2_ary_30_3)./3;
+M430 = (M4_ary_30_1 + M4_ary_30_2 + M4_ary_30_3)./3;
+M830 = (M8_ary_30_1 + M8_ary_30_2 + M8_ary_30_3)./3;
+
+M260 = (M2_ary_60_1 + M2_ary_60_2 + M2_ary_60_3)./3;
+M460 = (M4_ary_60_1 + M4_ary_60_2 + M4_ary_60_3)./3;
+M860 = (M8_ary_60_1 + M8_ary_60_2 + M8_ary_60_3)./3;
+
+M290 = (M2_ary_90_1 + M2_ary_90_2 + M2_ary_90_3)./3;
+M490 = (M4_ary_90_1 + M4_ary_90_2 + M4_ary_90_3)./3;
+M890 = (M8_ary_90_1 + M8_ary_90_2 + M8_ary_90_3)./3;
+
+Output = [M230;M430;M830;
+          M260;M460;M860;
+          M290;M490;M890];
+
 end
 
 % ======================== END OF CODE ====================================
