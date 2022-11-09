@@ -17,8 +17,8 @@ function errorCounter = experimentalBERDataAnalysis(filename, duration, bitLengt
     
     for i= 1:bitLength
     
-        discreteData(i) = A(start + duration*(i)); 
-        discreteTime(i) =   start + duration*(i);
+        discreteData(i) = A(start + duration*i); 
+        discreteTime(i) =   start + duration*i;
     
     end
     
@@ -72,13 +72,8 @@ function errorCounter = experimentalBERDataAnalysis(filename, duration, bitLengt
     
     for u = 1:bitLength
     
-        if decodedValues(u) == experimentalTransmittedSignal(u)
-            
-            fprintf('%d is correct \n'  , u);
-            
-        else
-            
-            fprintf('%d is wrong \n'    , u);
+        if decodedValues(u) ~= experimentalTransmittedSignal(u)
+                         
             errorCounter = errorCounter + 1;
             
         end    
