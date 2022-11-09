@@ -1,46 +1,51 @@
-% MOLECULAR SINGLE VELOCITY ANALYSIS -----------------------------------------
-% Daniel McGuiness 06.07.2018 ---------------------------------------------
+% ========================= BEGIN CODE ====================================
+
+% -------------------------------------------------------------------------
+% -- Experimental and Theoretical BER Analysis by Daniel T. McGuiness -----
 % -------------------------------------------------------------------------
 
-clear all
+clear variables
 clc
 
 % Variables ---------------------------------------------------------------
 
-x = 2.5;                                    % Transmission Distance(cm)
-v = 0.1;                                    % Advective Flow       (cm/s)
-r = 0.3;                                    % Detector Radius      (cm)
-
-D_L = 0.124;                                  % Longitudional coefficient of 
+distance        = 2.5;             % Transmission Distance(cm)
+advectiveFlow   = 0.1;                                    % Advective Flow       (cm/s)
+diffusion       = 0.124; 
                                             % Diffusivity          (cm^2/s)
-
-M = 1;                                      % Injected Mass        (ng)
-D_R = 0.001;                                % Radial coefficient of 
+mass            = 1;                                      % Injected Mass        (ng)
                                             % Diffusivity          (cm^2/s)
+experimentalBitLength   = 200;
+bitLength               = 1000;                    % Transmitted Random bit length
+bitCounter              = 1;
+levelCounter            = 2^(bitCounter);    % Number of levels in the channel
 
-%x = 2.5;                                % Transmission Distance (cm)
-D = 0.124;                              % Advective Flow (cm)
-%M = 0.9;                                % Injected mass (kg)
-v = 0.135;
-bitLength       = 10000;                    % Transmitted Random bit length
-bitCounter      = 1;
-levelCounter    = 2^(bitCounter);    % Number of levels in the channel
+filename = {'Ber5secExperimentalData.xlsx', 'Ber10secExperimentalData.xlsx', ...
+            'Ber15secExperimentalData.xlsx','Ber20secExperimentalData.xlsx', ...
+            'Ber25secExperimentalData.xlsx','Ber30secExperimentalData.xlsx'};
 
-A1 = experimentalBERDataAnalysis('Ber5secExperimentalData.xlsx', 5, 200, 18);
-A2 = experimentalBERDataAnalysis('Ber10secExperimentalData.xlsx', 10, 200, 18);
+startTime   = [18 18 16 20 20 20];
+duration    = [5  10 15 20 25 30];
 
+% Memory Allocation -------------------------------------------------------
 
-CBER_Error  = [26 22 28 29; 20 17 11 10 ; 12 1 4 1; 11 5 4 0; 2 3 2 0]./100;
+experimentalData    = zeros(1, 6);
+Error               = zeros(1, 6);
+I_XY                = zeros(1, 6);
+Channel             = zeros(1, 6);
 
+% -------------------------------------------------------------------------
 
-    Error               = zeros(1, 5);
-    I_XY                = zeros(1, 5);
-    Channel             = zeros(1, 5);
-
+for i = 1:1:6
+experimentalData(i) = experimentalBERDataAnalysis(filename{i}, ...
+                                                  duration(i), ...
+                                                  experimentalBitLength, ...
+                                                  startTime(i))/experimentalBitLength;
+end
 
 counter = 1;
-    
-for symbolDuration = [5 10 15 20 25]                 % Counter operator (dB)
+
+for symbolDuration = [5 10 15 20 25 30]             % Counter operator (dB)
     
     dB  = 25;
     
@@ -69,7 +74,7 @@ for symbolDuration = [5 10 15 20 25]                 % Counter operator (dB)
 
     % Simulating physical transmission ------------------------------------
 
-    Cm                  = transmission(D, v, x, ...
+    Cm                  = transmission(diffusion, advectiveFlow, distance, ...
                                        bitSequence, ...
                                        bitRepetition, symbolDuration);
 
@@ -130,30 +135,17 @@ for symbolDuration = [5 10 15 20 25]                 % Counter operator (dB)
 end
 
 
-y_pos = [3.33333333333334,3.66666666666667,1,0.666666666666667,0]./100;
-y_neg = [4.66666666666666,2.33333333333333,1,0.333333333333333,0]./100;
-
-%BERE =[38.6666666666667,19.3333333333333,6,4.33333333333333,0.333333333333333]./100;
-BERE =[A1/2,19.3333333333333,6,4.33333333333333,0.333333333333333]./100;
-
-dB_axis = [5 10 15 20 25];
-exp_axis = [5 10 15 20 25];
+dB_axis     = [5 10 15 20 25 30];
+exp_axis    = [5 10 15 20 25 30];
 
 
 hold on
-he1 = errorbar(exp_axis, BERE,y_pos,y_neg,'o','Linewidth',1.2)
+plot(exp_axis, experimentalData,'o','Linewidth',1.2)
 hold on
 semilogy(dB_axis,Error,'s','Linewidth',2,...
                 'MarkerFaceColor',[0.8500    0.3250    0.0980]   , ...
                 'MarkerEdgeColor',[0.8500    0.3250    0.0980]   , ...
                 'MarkerSize', 8)
-            
-set(he1                        , ...
-  'LineWidth'       , 1.5      , ...
-  'Color'           , [0    0.4470    0.7410]   , ...
-  'MarkerSize'      , 8        , ...
-  'MarkerEdgeColor' , [0    0.4470    0.7410]  , ...
-  'MarkerFaceColor' , [0    0.4470    0.7410]   );
 
 % Nice plot code ----------------------------------------------------------
 
@@ -177,10 +169,11 @@ ylim([1e-4,1e-0]);
 
 ylabel('Symbol Error Rate [SER]','Interpreter','Latex')
 xlabel('Symbol Duration [s]','Interpreter','Latex')
-%title({'$D$ = 0.124 $\mathrm{cm^2/s}$, $u_x$ = 0.136 $\mathrm{cm/s}$'; '$x$ = 2.5 $\mathrm{cm}$, $\rho$ = 0.94'},'Interpreter','Latex','Fontsize',16)
 
-label = legend('Experimental Results','Theoretical Model');
-set(label,'Interpreter','Latex','Orientation','Vertical','Location','Southwest')
+set(legend('Experimental Results','Theoretical Model'), ...
+           'Interpreter', 'Latex', ...
+           'Orientation','Vertical', ...
+           'Location','Southwest')
 
 
 figure
@@ -211,6 +204,6 @@ set(gca, ...
 ylabel('Mutual Information [bit/sym]','Interpreter','Latex')
 xlabel('Symbol Duration [s]','Interpreter','Latex')
 
-BER_Error = [Error(1) Error(2) Error(3) Error(4) Error(5)];
+BER_Error = [Error(1) Error(2) Error(3) Error(4) Error(5) Error(6)];
 
-corrcoef(BER_Error,BERE)
+corrcoef(BER_Error,experimentalData)
