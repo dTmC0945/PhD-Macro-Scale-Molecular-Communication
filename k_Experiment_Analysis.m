@@ -1,20 +1,20 @@
+% ========================= BEGIN CODE ====================================
+
+% -------------------------------------------------------------------------
+% -- k- Repetititon by Daniel T. McGuiness --------------------------------
+% -------------------------------------------------------------------------
+
 clear variables
 clc
 
 % Function Paths ----------------------------------------------------------
 
-addpath("./Functions")
-addpath("./Experimental Data")
-
-opts = detectImportOptions('kExperimentalData.xlsx');
-opts.DataRange = [1 Inf]; %rows;
-cols = length(opts.VariableNames); %finding number of columns;
-opts.SelectedVariableNames = [1, 1:cols];
-A = readtable('kExperimentalData.xlsx',opts);
+addpath("./Functions")              % path where all used function are
+addpath("./Experimental Data")      % path where experimental data are
 
 % Memory Allocation -------------------------------------------------------
 
-leftoverTheoretical         = zeros(4, 11);
+leftoverTheoretical         = zeros(4, 11); 
 leftoverExperimentalAverage = zeros(4, 11);
 leftoverExperimental        = zeros(12, 11);
 
@@ -26,11 +26,11 @@ kData                       = cell(4,1);
 
 % Model Parameters --------------------------------------------------------
 
-diffusion       = 0.15;
-advectiveFlow   = 0.17; 
-distance        = 2.5;      % Parameters
-mass            = [0.6, 0.9, 1.2, 1.9];
-symbolDuration  = 20; 
+diffusion       = 0.15;                 % diffusion coefficient (m2/s)
+advectiveFlow   = 0.17;                 % advective flow (m/s)
+distance        = 2.5;                  % transmission distance (m)
+mass            = [0.6, 0.9, 1.2, 1.9]; % injected mass (ng)
+symbolDuration  = 20;                   % symbol duration (s)
 
 for i = 1:1:4
     bitSequence(i,:)    = mass(i).*[0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0];
@@ -38,17 +38,25 @@ for i = 1:1:4
 
 end
 
-mu_a    = 1.21*10^-3;               % Mean
-sigma_a = sqrt(0.0960*10^-6);       % Standard deviation
+mu_a    = 1.21*10^-3;                   % Mean
+sigma_a = sqrt(0.0960*10^-6);           % Standard deviation
 
 % Experimental Values -----------------------------------------------------
+
+A = dataRead("kExperimentalData.xlsx"); % reading data using dataread
+
+% Allocating the rows and removing rows and columns with text 
 
 kExperimentalData = table2cell([A(2,15:end) ;  A(3,15:end) ;  A(4,15:end) ; ...
                                 A(6,15:end) ;  A(7,15:end) ;  A(8,15:end) ; ...
                                 A(10,15:end);  A(11,15:end);  A(12,15:end); ...
                                 A(14,15:end);  A(15,15:end);  A(16,15:end)]);
 
-for kValue = 1:1:4
+% -------------------------------------------------------------------------
+
+for kValue = 1:1:4      % Comparing theoretical and experimental values ---
+
+    % Generating the theoretical transmission using transmission function
 
     CmNoisedk(kValue,:) = {addNoise(transmission(diffusion, advectiveFlow, ...
                                             distance, ....
@@ -56,9 +64,13 @@ for kValue = 1:1:4
                                             bitRepetition(kValue,:), ...
                                             symbolDuration), ...
                                             mu_a, sigma_a)};            
+    
+    % Getting the experimental data matching the kValue
 
     kData(kValue,:) = {mean(cell2mat(kExperimentalData(1 + 3*(kValue-1): ...
                                                        3 + 3*(kValue-1),:)))};
+
+    % Comparing them by plotting
 
     kPlot(kData, CmNoisedk, ...
           kValue, ...
@@ -100,8 +112,6 @@ for t = 1:1:11
    
 end
 
-
-
 distance = 1:1:11;
 x3 = [1 2 3 4 5 7 8 9 10 11];
 
@@ -117,45 +127,9 @@ figure
 for i = 1:1:4
 plot(leftoverTheoretical(i,:),'Linewidth',2 )
 hold on
+errorbar(distance,Leftover_E_1,err_k_1,'o');
+hold on
 end
-he1 = errorbar(distance,Leftover_E_1,err_k_1,'o');
-hold on
-he2 = errorbar(distance,Leftover_E_2,err_k_2,'o');
-hold on
-he3 = errorbar(x3,Leftover_E_3,err_k_3,'o', 'Color'     , CT_M(1,:));
-hold on
-he4 = errorbar(distance,Leftover_E_4,err_k_4,'o', 'Color'     , CT_M(1,:));
-hold on
-
-
-set(he1                        , ...
-  'LineWidth'       , 1.5      , ...
-  'Marker'          , 'o'      , ...
-  'Color'           , CT(1,:)  , ...
-  'MarkerSize'      , 8        , ...
-  'MarkerEdgeColor' , CT(1,:)  , ...
-  'MarkerFaceColor' , CT(1,:)   );
-set(he2                        , ...
-  'LineWidth'       , 1.5      , ...
-  'Marker'          , 'o'      , ...
-  'Color'           , CT(3,:)  , ...
-  'MarkerSize'      , 8        , ...
-  'MarkerEdgeColor' , CT(3,:)  , ...
-  'MarkerFaceColor' , CT(3,:)  );
-set(he3                        , ...
-  'LineWidth'       , 1.5      , ...
-  'Marker'          , 'o'      , ...
-  'Color'           , CT(5,:)  , ...
-  'MarkerSize'      , 8        , ...
-  'MarkerEdgeColor' , CT(5,:)  , ...
-  'MarkerFaceColor' , CT(5,:)  );
-set(he4                        , ...
-  'LineWidth'       , 1.5      , ...
-  'Marker'          , 'o'      , ...
-  'Color'           , CT(7,:)  , ...
-  'MarkerSize'      , 8        , ...
-  'MarkerEdgeColor' , CT(7,:)  , ...
-  'MarkerFaceColor' , CT(7,:)  );
 
 % Nice plot code ----------------------------------------------------------
 
@@ -176,19 +150,20 @@ ylabel('Leftover Signal [nA]','Interpreter','Latex')
 xlabel('Repetition','Interpreter','Latex')
 %title({'$D$ = 0.2 $\mathrm{cm^2/s}$, $u_x$ = 0.155 $\mathrm{cm/s}$, $x_d$ = 2.5 $\mathrm{cm}$'; '$ M_{k=1}$ = 0.6 $\mathrm{ng}$, $M_{k=2}$ = 0.9 $\mathrm{ng}$'; '$M_{k=3}$ = 1.2 $\mathrm{ng}$, $M_{k=4}$ = 1.9 $\mathrm{ng}$'},'Interpreter','Latex','Fontsize',16)
 
-Background_legend = legend('$k$ = 1','$k$ = 2','$k$ = 3','$k$ = 4');
-set(Background_legend,'Interpreter','Latex','Location','Northwest')
+set(legend('$k$ = 1','$k$ = 2','$k$ = 3','$k$ = 4'), ...
+           'Interpreter', 'Latex', ...
+           'Location', 'Northwest')
+
 xlim([1 10])
 
-
-% Correlation Values ======================================================
+% Correlation Values ------------------------------------------------------
 
 rho_k_1 = corrcoef(L_T_1,k1(1:length(L_T_1)));
 rho_k_2 = corrcoef(L_T_2,K_2(1:length(L_T_2)));
 rho_k_3 = corrcoef(L_T_3,K_3(1:length(L_T_3)));
 rho_k_4 = corrcoef(L_T_4,K_4(1:length(L_T_4)));
 
-% functions ---------------------------------------------------------------
+% ============================ FUNCTIONS ==================================
 
 function kPlot(kData, CmNoisedk, kValue, diffusion, advectiveFlow, distance)
 
@@ -236,11 +211,11 @@ function kPlot(kData, CmNoisedk, kValue, diffusion, advectiveFlow, distance)
     xlabel('Transmission Time [s]','Interpreter','Latex')
     
     
-    %title({"$D$ = " + diffusion + " $\mathrm{cm^2/s}$, " + ...
-    %       "$u_x$ = " + advectiveFlow + " $\mathrm{cm/s}$, " + ...
-    %       "$x_d$ = " distance + " $\mathrm{cm}$";" $M$ = 1.2 $\mathrm{ng}$, $\rho$ = 0.94"},'Interpreter','Latex','Fontsize',16)
+    title({"$D$ = " + diffusion + " $\mathrm{cm^2/s}$, $u_x$ =  $\mathrm{cm/s}$, $x_d$ = " distance + " $\mathrm{cm}$";" $M$ = 1.2 $\mathrm{ng}$, $\rho$ = 0.94"},'Interpreter','Latex','Fontsize',16)
     
     set(legend('Experimental Results','Theoretical Model'), ...
                'Interpreter','Latex', ...
                'Location','Northeast')
 end
+
+% ======================== END OF CODE ====================================
