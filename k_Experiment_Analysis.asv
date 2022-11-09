@@ -29,10 +29,13 @@ distance        = 2.5;      % Parameters
 mass            = [0.6, 0.9, 1.2, .19];
 symbolDuration  = 20; 
 
-% bitSequence     = mass.*[0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0];
-                   
+for i = 1:1:4
+    bitSequence(i,:) = mass(i).*[0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0];
+end
 
-% Noise Parameters --------------------------------------------------------
+bitRepetition   = [0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];
+  
+
 
 mu_a = 1.21*10^-3;              % Mean
 sigma_a = sqrt(0.0960*10^-6);   % Standard deviation
@@ -44,89 +47,36 @@ kExperimentalData = table2cell([A(2,15:end) ;  A(3,15:end) ;  A(4,15:end) ; ...
                                 A(10,15:end);  A(11,15:end);  A(12,15:end); ...
                                 A(14,15:end);  A(15,15:end);  A(16,15:end)]);
 
-% k = 1 Analysis ----------------------------------------------------------
+for i = 1:1:4
+    % k = 1 Analysis ----------------------------------------------------------
+    
+    
+    Cm(1,:) = {transmission(diffusion, advectiveFlow, ...
+                        distance, ....
+                        bitSequence1, bitRepetition1, ...
+                        symbolDuration)};
+    
+    CmNoisedk(1,:) = {addNoise(cell2mat(Cm), mu_a, sigma_a)};            
+    
+    k(1,:) = {mean(cell2mat(kExperimentalData(1:3,:)))};
+    
+    kPlot(k, CmNoisedk, 1, diffusion, advectiveFlow, distance)
 
-bitSequence1     = [0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0]*mass(1);
-bitRepetition1   = [0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];
-
-Cm(1,:) = {transmission(diffusion, advectiveFlow, ...
-                    distance, ....
-                    bitSequence1, bitRepetition1, ...
-                    symbolDuration)};
-
-CmNoisedk(1,:) = {addNoise(cell2mat(Cm), mu_a, sigma_a)};            
-
-k(1,:) = {mean(cell2mat(kExperimentalData(1:3,:)))};
-
-kPlot(k, CmNoisedk, 1, diffusion, advectiveFlow, distance)
-
-% Nice plot code ----------------------------------------------------------
-
-set(gca,'TickLabelInterpreter', 'latex');
-set(gca, ...
-  'Fontsize'    , 16        , ...
-  'TickDir'     , 'in'     , ...
-  'XGrid'       , 'on'      , ...
-  'YGrid'       , 'on'      , ...
-  'TickLength'  , [.02 .02] , ...
-  'GridLineStyle','--'      , ...
-  'YMinorTick'  , 'on'      , ...
-  'Box'         , 'on'     , ...
-  'XTick'       ,0:20:420 ,...
-  'YTick'       ,0:0.1:0.7, ...
-  'LineWidth'   , 1.5         );
-% -------------------------------------------------------------------------
-
-xlim([0 420])
-ylim([0 0.7])
-
-
-ylabel('Signal Current [nA]','Interpreter','Latex')
-xlabel('Transmission Time [s]','Interpreter','Latex')
-
-set(legend('Experimental Results','Theoretical Model'),'Interpreter','Latex','Location','Northeast')
+end
 
 % K = 2 Analysis ==========================================================
 
 bitSequence     = [0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0]*mass(2);
 bitRepetition   = [0 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2];
 
-Cmk2 = transmission(diffusion, advectiveFlow, ...
-                    distance, ....
-                    bitSequence, bitRepetition, ...
-                    symbolDuration);
-
-CmNoisedk(2,:) = {addNoise(Cmk2, mu_a, sigma_a)};            
+CmNoisedk(2,:) = {addNoise(transmission(diffusion, advectiveFlow, ...
+                                        distance, ....
+                                        bitSequence, bitRepetition, ...
+                                        symbolDuration), mu_a, sigma_a)};            
 
 k(2,:) = {mean(cell2mat(kExperimentalData(4:6,:)))};
 
-figure
-plot(cell2mat(k(2,:)),'Linewidth',2)
-hold on
-plot(cell2mat(CmNoisedk(2,:)),'Linewidth',2)
-
-% Nice plot code ----------------------------------------------------------
-
-set(gca,'TickLabelInterpreter', 'latex');
-set(gca, ...
-  'Fontsize'    , 16        , ...
-  'TickDir'     , 'in'     , ...
-  'XGrid'       , 'on'      , ...
-  'YGrid'       , 'on'      , ...
-  'TickLength'  , [.02 .02] , ...
-  'GridLineStyle','--'      , ...
-  'YMinorTick'  , 'on'      , ...
-  'Box'         , 'on'     , ...
-  'XTick'       ,40:40:840 ,...
-  'LineWidth'   , 1.5         );
-% -------------------------------------------------------------------------
-xticks(0:40:420*2)
-
-xlim([0 840])
-ylabel('Signal Current [nA]','Interpreter','Latex')
-xlabel('Transmission Time [s]','Interpreter','Latex')
-k2_legend = legend('Experimental Results','Theoretical Model');
-set(k2_legend,'Interpreter','Latex','Location','Northeast')
+kPlot(k, CmNoisedk, 2, diffusion, advectiveFlow, distance)
 
 % K = 3 Analysis ==========================================================
 
@@ -142,6 +92,9 @@ CmNoisedk(3,:) = {addNoise(Cmk3, mu_a, sigma_a)};
 
 k(3,:) = {mean(cell2mat(kExperimentalData(7:9,:)))};
 
+kPlot(k, CmNoisedk, 3, diffusion, advectiveFlow, distance)
+
+
 % K = 4 Analysis ==========================================================
 
 bitSequence     = [0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0]*mass(4);
@@ -156,19 +109,7 @@ CmNoisedk(4,:) = {addNoise(Cmk4, mu_a, sigma_a)};
 
 k(4,:) = {mean(cell2mat(kExperimentalData(10:12,:)))};
 
-figure
-
-plot(cell2mat(k(4,:)),'Linewidth',2)
-hold on
-plot(cell2mat(CmNoisedk(4,:)),'Linewidth',2)
-
-xlim([0 420*4])
-
-k4_legend = legend('Experimental Results','Theoretical Model');
-set(k4_legend,'Interpreter','Latex','Location','Northeast')
-ylabel('Signal Current [nA]','Interpreter','Latex')
-xlabel('Transmission Time [s]','Interpreter','Latex')
-
+kPlot(k, CmNoisedk, 4, diffusion, advectiveFlow, distance)
 
 
 for t = 1:1:11
@@ -295,12 +236,12 @@ rho_k_4 = corrcoef(L_T_4,K_4(1:length(L_T_4)));
 
 % functions ---------------------------------------------------------------
 
-function kPlot(k, CmNoisedk, i, diffusion, advectiveFlow, distance)
+function kPlot(k, CmNoisedk, kValue, diffusion, advectiveFlow, distance)
 
     figure
-    plot(cell2mat(k(i,:))*10^9      ,'Linewidth', 2)
+    plot(cell2mat(k(kValue,:))*10^9      ,'Linewidth', 2)
     hold on
-    plot(cell2mat(CmNoisedk(i,:))   ,'Linewidth', 2)
+    plot(cell2mat(CmNoisedk(kValue,:))   ,'Linewidth', 2)
     
     % Nice plot code ------------------------------------------------------
     
@@ -313,28 +254,28 @@ function kPlot(k, CmNoisedk, i, diffusion, advectiveFlow, distance)
       'TickLength'              , [.02 .02]     , ...
       'GridLineStyle'           , '--'          , ...
       'YMinorTick'              , 'on'          , ...
-      'Box'                     , 'on'          , ...
-      'XTick'                   , 60:60:420 * i ,...
-      'YTick'                   , 0:0.2:1.4     ,...
+      'Box'                     , 'on'                  , ...
+      'XTick'                   , 0:20*kValue:420* kValue     ,...
+      'YTick'                   , 0:0.4:2       ,...
       'LineWidth'               , 1.5           );
 
     % ---------------------------------------------------------------------
     
-    xlim([0 420*i]);    xticks(0:60:420*i);
+    xlim([0 420*kValue]);
+    ylim([0 2])
     
     for n = 1:1:7
-        tickValues(n,i) = 60*n*i;
+        tickValues(n,kValue) = 60*n*kValue;
     end
 
-    xticklabels({'0', '', '', tickValues(1,i), ...
-                      '', '', tickValues(2,i), ...
-                      '', '', tickValues(3,i), ...
-                      '' , '', tickValues(4,i), ...
-                      '' , '', tickValues(5,i), ...
-                      '', '', tickValues(6,i),'','',tickValues(7,i)})
+    xticklabels({'0', '', '', tickValues(1,kValue), ...
+                      '', '', tickValues(2,kValue), ...
+                      '', '', tickValues(3,kValue), ...
+                      '', '', tickValues(4,kValue), ...
+                      '', '', tickValues(5,kValue), ...
+                      '', '', tickValues(6,kValue), ...
+                      '', '', tickValues(7,kValue)})
 
-
-    
     ylabel('Signal Current [nA]','Interpreter','Latex')
     xlabel('Transmission Time [s]','Interpreter','Latex')
     

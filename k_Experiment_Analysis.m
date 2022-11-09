@@ -21,19 +21,22 @@ leftoverExperimental = zeros(12,11);
 CmNoisedk = cell(4,1);
 kData     = cell(4,1);
 
+
 % Model Parameters --------------------------------------------------------
 
 diffusion       = 0.15;
 advectiveFlow   = 0.17; 
 distance        = 2.5;      % Parameters
-mass            = [0.6, 0.9, 1.2, .19];
+mass            = [0.6, 0.9, 1.2, 1.9];
 symbolDuration  = 20; 
 
-% bitSequence     = mass.*[0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0];
-                   
+for i = 1:1:4
+    bitSequence(i,:)    = mass(i).*[0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0];
+    bitRepetition(i,:)  =       i.*[0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];
 
-% Noise Parameters --------------------------------------------------------
+end
 
+  
 mu_a = 1.21*10^-3;              % Mean
 sigma_a = sqrt(0.0960*10^-6);   % Standard deviation
 
@@ -44,70 +47,23 @@ kExperimentalData = table2cell([A(2,15:end) ;  A(3,15:end) ;  A(4,15:end) ; ...
                                 A(10,15:end);  A(11,15:end);  A(12,15:end); ...
                                 A(14,15:end);  A(15,15:end);  A(16,15:end)]);
 
-% k = 1 Analysis ----------------------------------------------------------
+for kValue = 1:1:4
 
-bitSequence1     = [0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0]*mass(1);
-bitRepetition1   = [0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];
+    CmNoisedk(kValue,:) = {addNoise(transmission(diffusion, advectiveFlow, ...
+                                            distance, ....
+                                            bitSequence(kValue,:), ...
+                                            bitRepetition(kValue,:), ...
+                                            symbolDuration), ...
+                                            mu_a, sigma_a)};            
 
-Cm(1,:) = {transmission(diffusion, advectiveFlow, ...
-                    distance, ....
-                    bitSequence1, bitRepetition1, ...
-                    symbolDuration)};
+    kData(kValue,:) = {mean(cell2mat(kExperimentalData(1 + 3*(kValue-1): ...
+                                                       3 + 3*(kValue-1),:)))};
 
-CmNoisedk(1,:) = {addNoise(cell2mat(Cm), mu_a, sigma_a)};            
+    kPlot(kData, CmNoisedk, ...
+          kValue, ...
+          diffusion, advectiveFlow, distance)
 
-k(1,:) = {mean(cell2mat(kExperimentalData(1:3,:)))};
-
-kPlot(k, CmNoisedk, 1, diffusion, advectiveFlow, distance)
-
-% K = 2 Analysis ==========================================================
-
-bitSequence     = [0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0]*mass(2);
-bitRepetition   = [0 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2];
-
-Cmk2 = transmission(diffusion, advectiveFlow, ...
-                    distance, ....
-                    bitSequence, bitRepetition, ...
-                    symbolDuration);
-
-CmNoisedk(2,:) = {addNoise(Cmk2, mu_a, sigma_a)};            
-
-k(2,:) = {mean(cell2mat(kExperimentalData(4:6,:)))};
-
-kPlot(k, CmNoisedk, 2, diffusion, advectiveFlow, distance)
-
-% K = 3 Analysis ==========================================================
-
-bitSequence = [0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0]*mass(3);
-bitRepetition  = [0 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3];
-
-Cmk3 = transmission(diffusion, advectiveFlow, ...
-                    distance, ....
-                    bitSequence, bitRepetition, ...
-                    symbolDuration);
-
-CmNoisedk(3,:) = {addNoise(Cmk3, mu_a, sigma_a)};            
-
-k(3,:) = {mean(cell2mat(kExperimentalData(7:9,:)))};
-
-kPlot(k, CmNoisedk, 3, diffusion, advectiveFlow, distance)
-
-
-% K = 4 Analysis ==========================================================
-
-bitSequence     = [0 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0]*mass(4);
-bitRepetition   = [0 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4];
-
-Cmk4 = transmission(diffusion, advectiveFlow, ...
-                    distance, ....
-                    bitSequence, bitRepetition, ...
-                    symbolDuration);
-
-CmNoisedk(4,:) = {addNoise(Cmk4, mu_a, sigma_a)};            
-
-k(4,:) = {mean(cell2mat(kExperimentalData(10:12,:)))};
-
-kPlot(k, CmNoisedk, 4, diffusion, advectiveFlow, distance)
+end
 
 
 for t = 1:1:11
@@ -234,10 +190,10 @@ rho_k_4 = corrcoef(L_T_4,K_4(1:length(L_T_4)));
 
 % functions ---------------------------------------------------------------
 
-function kPlot(k, CmNoisedk, kValue, diffusion, advectiveFlow, distance)
+function kPlot(kData, CmNoisedk, kValue, diffusion, advectiveFlow, distance)
 
     figure
-    plot(cell2mat(k(kValue,:))*10^9      ,'Linewidth', 2)
+    plot(cell2mat(kData(kValue,:))*10^9      ,'Linewidth', 2)
     hold on
     plot(cell2mat(CmNoisedk(kValue,:))   ,'Linewidth', 2)
     
@@ -253,7 +209,7 @@ function kPlot(k, CmNoisedk, kValue, diffusion, advectiveFlow, distance)
       'GridLineStyle'           , '--'          , ...
       'YMinorTick'              , 'on'          , ...
       'Box'                     , 'on'                  , ...
-      'XTick'                   , 60:60:420* kValue     ,...
+      'XTick'                   , 0:20*kValue:420* kValue     ,...
       'YTick'                   , 0:0.4:2       ,...
       'LineWidth'               , 1.5           );
 
