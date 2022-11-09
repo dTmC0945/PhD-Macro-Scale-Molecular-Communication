@@ -15,7 +15,7 @@ diffusion       = 0.124;                    % Diffusivity           (cm^2/s)
 mass            = 1;                        % Injected Mass         (ng)
 
 experimentalBitLength   = 200;              % Experimentally sent bit count
-bitLength               = 1000;             % Transmitted Random bit length
+bitLength               = 10000;            % Transmitted Random bit length
 bitCounter              = 1;                % Bits per symbol
 levelCounter            = 2^(bitCounter);   % Number of levels in the channel
 
@@ -30,10 +30,9 @@ filename = {'Ber5secExperimentalData.xlsx', 'Ber10secExperimentalData.xlsx', ...
 
 % Memory Allocation -------------------------------------------------------
 
-experimentalData    = zeros(1, 6);
-Error               = zeros(1, 6);
-I_XY                = zeros(1, 6);
-Channel             = zeros(1, 6);
+experimentalData    = zeros(1, 6);  Error       = zeros(1, 6);
+I_XY                = zeros(1, 6);  Channel     = zeros(1, 6);
+corrTheoretical     = zeros(1, 6);
 
 % Acquiring the BER experimental data -------------------------------------
 
@@ -46,9 +45,13 @@ end
 
 % Generating the theoretical Values ---------------------------------------
 
-counter = 1;
+counter = 1;     theoreticalIterator = 1;
 
-for symbolDuration = [5 10 15 20 25 30]             % Counter operator (dB)
+theoryDuration = 1:1:30;
+
+for i = 1:1:30             % Counter operator (dB)
+
+    symbolDuration = theoryDuration(i);
     
     dB  = 25;
     
@@ -122,6 +125,12 @@ for symbolDuration = [5 10 15 20 25 30]             % Counter operator (dB)
     % Assigning the variables to matrices----------------------------------
 
     Error(counter)   = EValue;      % Error Value
+   
+    if mod(i,5) == 0
+        corrTheoretical(theoreticalIterator) = Error(i);
+                        theoreticalIterator  = theoreticalIterator + 1;
+    end
+
     I_XY(counter)    = IValue;      % Mutual Information
     Channel(counter) = chValue;     % Shannon Channel
 
@@ -133,9 +142,9 @@ end
 
 figure % plotting SER for theory vs. experiment ---------------------------
 
-semilogy(duration, experimentalData,'o','Linewidth',1.2)
+semilogy(theoryDuration, Error, 'Linewidth', 2)
 hold on
-semilogy(duration,Error,'s','Linewidth',2,...
+semilogy(duration, experimentalData,'s','Linewidth',2,...
                 'MarkerFaceColor',[0.8500    0.3250    0.0980]   , ...
                 'MarkerEdgeColor',[0.8500    0.3250    0.0980]   , ...
                 'MarkerSize', 8)
@@ -163,18 +172,15 @@ ylim([1e-4,1e-0]);
 xlabel('Symbol Duration [s]','Interpreter','Latex')
 ylabel('Symbol Error Rate [SER]','Interpreter','Latex')
 
-set(legend('Experimental Results','Theoretical Model'), ...
+set(legend('Theoretical Model', 'Experimental Results'), ...
            'Interpreter', 'Latex', ...
            'Orientation', 'Vertical', ...
            'Location'   , 'Southwest')
 
 
-figure
+figure    % ---------------------------------------------------------------
 
-plot(duration,I_XY,'-s','Linewidth',2,...
-                'MarkerFaceColor',[0    0.4470    0.7410]   , ...
-                'MarkerEdgeColor',[0    0.4470    0.7410])
-hold on
+plot(theoryDuration, I_XY, 'Linewidth', 2)
 
 % Nice plot code ----------------------------------------------------------
 
@@ -198,4 +204,6 @@ ylabel('Mutual Information [bit/sym]'   , 'Interpreter', 'Latex')
 
 % Correlation -------------------------------------------------------------
 
-correlation = findCorrelation(Error,experimentalData);
+correlation = findCorrelation(corrTheoretical, experimentalData);
+
+% ======================== END OF CODE ====================================
