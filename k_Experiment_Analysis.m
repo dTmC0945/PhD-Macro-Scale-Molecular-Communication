@@ -14,13 +14,15 @@ A = readtable('kExperimentalData.xlsx',opts);
 
 % Memory Allocation -------------------------------------------------------
 
-leftoverTheoretical = zeros(4,11);
-leftoverExperimentalAverage = zeros(4,11);
-leftoverExperimental = zeros(12,11);
+leftoverTheoretical         = zeros(4, 11);
+leftoverExperimentalAverage = zeros(4, 11);
+leftoverExperimental        = zeros(12, 11);
 
-CmNoisedk = cell(4,1);
-kData     = cell(4,1);
+bitSequence                 = zeros(4, 22);
+bitRepetition               = zeros(4, 22);
 
+CmNoisedk                   = cell(4,1);
+kData                       = cell(4,1);
 
 % Model Parameters --------------------------------------------------------
 
@@ -36,9 +38,8 @@ for i = 1:1:4
 
 end
 
-  
-mu_a = 1.21*10^-3;              % Mean
-sigma_a = sqrt(0.0960*10^-6);   % Standard deviation
+mu_a    = 1.21*10^-3;               % Mean
+sigma_a = sqrt(0.0960*10^-6);       % Standard deviation
 
 % Experimental Values -----------------------------------------------------
 
@@ -73,11 +74,11 @@ for t = 1:1:11
     for i = 1:1:4
 
         leftoverTheoretical(i,t)            = CmNoisedk{i}(1,20*i + 40*i*(t-1));
-        leftoverExperimentalAverage(i,t)    = k{i}(1,20*i + 40*i*(t-1));
+        leftoverExperimentalAverage(i,t)    = kData{i}(1,20*i + 40*i*(t-1));
 
         for j = 1:1:3
             
-            leftoverExperimental(i*j,t)     = kExperimentalData{counter}(1,20*i + 40*i*(t-1));
+            leftoverExperimental(i*j,t)     = cell2mat(kExperimentalData(i,20*i + 40*i*(t-1)));
             
             counter = counter + 1;
         end
@@ -96,8 +97,7 @@ for t = 1:1:11
                                  kExperimentalData(10,80 + 160*(t-1)); ...
                                  kExperimentalData(11,80 + 160*(t-1)); ...
                                  kExperimentalData(12,80 + 160*(t-1))];
-    
-
+   
 end
 
 
@@ -192,6 +192,8 @@ rho_k_4 = corrcoef(L_T_4,K_4(1:length(L_T_4)));
 
 function kPlot(kData, CmNoisedk, kValue, diffusion, advectiveFlow, distance)
 
+    tickValues = zeros(1, 7);
+
     figure
     plot(cell2mat(kData(kValue,:))*10^9      ,'Linewidth', 2)
     hold on
@@ -219,16 +221,16 @@ function kPlot(kData, CmNoisedk, kValue, diffusion, advectiveFlow, distance)
     ylim([0 2])
     
     for n = 1:1:7
-        tickValues(n,kValue) = 60*n*kValue;
+        tickValues(n) = 60*n*kValue;
     end
 
-    xticklabels({'0', '', '', tickValues(1,kValue), ...
-                      '', '', tickValues(2,kValue), ...
-                      '', '', tickValues(3,kValue), ...
-                      '', '', tickValues(4,kValue), ...
-                      '', '', tickValues(5,kValue), ...
-                      '', '', tickValues(6,kValue), ...
-                      '', '', tickValues(7,kValue)})
+    xticklabels({'0', '', '', tickValues(1), ...
+                      '', '', tickValues(2), ...
+                      '', '', tickValues(3), ...
+                      '', '', tickValues(4), ...
+                      '', '', tickValues(5), ...
+                      '', '', tickValues(6), ...
+                      '', '', tickValues(7)})
 
     ylabel('Signal Current [nA]','Interpreter','Latex')
     xlabel('Transmission Time [s]','Interpreter','Latex')
