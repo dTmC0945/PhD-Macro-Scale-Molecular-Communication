@@ -78,6 +78,7 @@ for kValue = 1:1:4      % Comparing theoretical and experimental values ---
 
 end
 
+p = cell2mat(kExperimentalData);
 
 for t = 1:1:11
     
@@ -90,25 +91,11 @@ for t = 1:1:11
 
         for j = 1:1:3
             
-            leftoverExperimental(i*j,t)     = cell2mat(kExperimentalData(i,20*i + 40*i*(t-1)));
+            leftoverExperimental(i*j,t)     = p(i,20*i + 40*i*(t-1));
             
             counter = counter + 1;
         end
     end
-
-    
-    leftoverExperimental(:,t) = [kExperimentalData(1, 20 + 40 *(t-1)); ...
-                                 kExperimentalData(2, 20 + 40 *(t-1)); ...
-                                 kExperimentalData(3, 20 + 40 *(t-1)); ...
-                                 kExperimentalData(4, 40 + 80 *(t-1)); ...
-                                 kExperimentalData(5, 40 + 80 *(t-1)); ...
-                                 kExperimentalData(6, 40 + 80 *(t-1)); ...
-                                 kExperimentalData(7, 60 + 120*(t-1)); ...
-                                 kExperimentalData(8, 60 + 120*(t-1)); ...
-                                 kExperimentalData(9, 60 + 120*(t-1)); ...
-                                 kExperimentalData(10,80 + 160*(t-1)); ...
-                                 kExperimentalData(11,80 + 160*(t-1)); ...
-                                 kExperimentalData(12,80 + 160*(t-1))];
    
 end
 
@@ -127,10 +114,11 @@ figure
 for i = 1:1:4
 plot(leftoverTheoretical(i,:),'Linewidth',2 )
 hold on
-errorbar(distance,Leftover_E_1,err_k_1,'o');
-hold on
+
 end
 
+errorbar(distance,Leftover_E_1,err_k_1,'o');
+hold on
 % Nice plot code ----------------------------------------------------------
 
 set(gca,'TickLabelInterpreter', 'latex');
@@ -211,7 +199,7 @@ function kPlot(kData, CmNoisedk, kValue, diffusion, advectiveFlow, distance)
     xlabel('Transmission Time [s]','Interpreter','Latex')
     
     
-    title({"$D$ = " + diffusion + " $\mathrm{cm^2/s}$, $u_x$ =  $\mathrm{cm/s}$, $x_d$ = " distance + " $\mathrm{cm}$";" $M$ = 1.2 $\mathrm{ng}$, $\rho$ = 0.94"},'Interpreter','Latex','Fontsize',16)
+   % title({"$D$ = " + diffusion + " $\mathrm{cm^2/s}$, $u_x$ =  $\mathrm{cm/s}$, $x_d$ = " distance + " $\mathrm{cm}$";" $M$ = 1.2 $\mathrm{ng}$, $\rho$ = 0.94"},'Interpreter','Latex','Fontsize',16)
     
     set(legend('Experimental Results','Theoretical Model'), ...
                'Interpreter','Latex', ...
