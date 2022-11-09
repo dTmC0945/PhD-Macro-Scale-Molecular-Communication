@@ -1,9 +1,20 @@
-% QUANTITY ANALYSIS -------------------------------------------------------
+% ========================= BEGIN CODE ====================================
 
-clear all 
+% -------------------------------------------------------------------------
+% -- Quantity Analysis by Daniel T. McGuiness -----------------------------
+% -------------------------------------------------------------------------
+
+clear variables
 clc
 
-A = xlsread('Quantity_Q.xlsx');         % Experimental Data
+% Function Paths ----------------------------------------------------------
+
+addpath("./Functions")
+addpath("./Experimental Data")
+
+% -------------------------------------------------------------------------
+
+A = dataRead("QuantityExperimentalData.xlsx");        % Experimental Data
 
 q1 = A(1,:)*10^9;                       % 1 ml/min
 q2 = A(3,:)*10^9;                       % 2 ml/min
