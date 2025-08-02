@@ -29,7 +29,7 @@ For brief information, have a look at the Abstract below.
 Feel free to use the code as you wish. I have also added the data I gathered from experiments
 as a starting point.
 
-If you would like to cite the work in the repor, please use the following BibTeX:
+If you would like to cite the work in the repo, please use the following BibTeX:
 
 #+begin_src bibtex
 @book{mcguiness2020macro,
