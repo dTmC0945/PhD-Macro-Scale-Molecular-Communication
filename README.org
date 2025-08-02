@@ -1,0 +1,114 @@
+:PROPERTIES:
+:ID: B18C564D-0EBC-4D77-BEF4-773E9F8E5851
+:END:
+#+TITLE: PhD - Macro-Sale Molecular Communications Resources 
+
+** Table of Contents :TOC_5:
+  - [[#introduction][Introduction]]
+  - [[#absract][Absract]]
+  - [[#preface][Preface]]
+
+** Introduction
+
+Hello Everyone.
+
+| TYPE | LINK                         |
+|------+------------------------------|
+| PDF  | [[https://livrepository.liverpool.ac.uk/3076712/][Liverpool University Library]] |
+| HTML | Github Pages                 |
+
+
+This repo is a collection of my work, programs, experimental data I used during my PhD on
+Macro-Scale Molecular Communications which you can access it as PDF from the Liverpool library
+or you can view it in HTML form.
+
+The topic is about modelling the transmission of chemical signals as it propagates through
+space using both theoretical and experimental validation in macro-scale (i.e., cm to m).
+For brief information, have a look at the Abstract below.
+
+Feel free to use the code as you wish. I have also added the data I gathered from experiments
+as a starting point.
+
+If you would like to cite the work in the repor, please use the following BibTeX:
+
+#+begin_src bibtex
+@book{mcguiness2020macro,
+  title     = {Macro-scale molecular communications},
+  author    = {McGuiness, Daniel Tun{\c{c}}},
+  year      = {2020},
+  publisher = {The University of Liverpool (United Kingdom)}
+}
+#+end_src
+
+** Absract
+
+The use of electromagnetic (EM) waves to transmit information has allowed our society to
+collaborate and share information on a scale that was unimaginable just a few decades ago. But
+as with any technology, there are areas where EM-based communications do not function well. For
+example, underwater and underground communications where EM waves experience high
+attenuation. This limitation has generated interest in an alternative mode of information
+transmission, molecular communications.
+
+In this thesis, after giving a survey of micro- and macro-scale molecular communications, the
+two most important aspects of molecular communications are identified: macro-scale molecular
+communications and the experimental analysis of molecular communications. Molecular
+communication has been dominated so far by interest in the nano-scale, where the application
+focus is on drug-delivery and DNA communications, etc. Studies in the macro-scale are
+relatively rare compared to nano- and micro-scale research. This thesis looks closely at
+macro-scale molecular communication and attempts to improve our understanding of this novel
+communication paradigm. To achieve this, a mathematical model was developed, based on the
+advective-diffusion equation (ADE). The model was compared with experimental results, and
+showed a strong correlation. In addition, a model was developed to simulate molecular
+communication in both 1D and 3D environments.
+
+To generate the modulated chemicals and transmit them in the environment, an in-house-built
+odour generator was used, and to detect the chemicals in the environment a mass spectrometer
+(MS) with a quadrupole mass analyser (QMA) was employed. Mass spectrometers have the ability to
+distinguish multiple chemicals in the environment concurrently, making them ideal detectors for
+use in molecular communications. Based on the experimental setup, various aspects of the
+communication paradigm are investigated in the three main sections. The first section focuses
+on the fundamental parameters that govern the propagation of molecules in a flow. The second
+section delves into the communication properties of this new form of information transfer. The
+final section studies aspects of simultaneous multiple-chemical transmission. Based on this
+multiple-chemical transmission, modulation methods are developed that exploit this new approach
+for use in molecular communications.
+
+** Preface
+
+All of the work presented henceforth was conducted in the Advanced Network Reseach Group (ANRG)
+and the Mass Spectrometry Laboratory at the department of Electrical Engineering &
+Electronics, University of Liverpool, UK.
+
+A version of Chapter 4 has been published in the journal IEEE Access as /Parameter
+Analysis in Macro-Scale Molecular Communications Using Advection-Diffusion/, in IEEE
+Communication Letters as /Experimental Results on the Open-Air Transmission of
+Macro-Molecular Communication Using Membrane Inlet Mass Spectrometry/ and in IEEE Access as
+/Modulation analysis in Macro-Molecular Communications/. I was the lead investigator,
+responsible for all major areas of concept formation, mathematical modelling and analysis, as
+well as manuscript composition. Professor Alan Marshall was the supervisory author on this
+project and was involved throughout the project in concept formation and manuscript edits.
+
+A version of Chapter 5 has been published in the journal IEEE Access as /Parameter
+Analysis in Macro-Scale Molecular Communications Using Advection-Diffusion/ and in IEEE
+Communication Letters as /Experimental Results on the Open-Air Transmission of
+Macro-Molecular Communication Using Membrane Inlet Mass Spectrometry/. I was the lead
+investigator, responsible for all major areas of concept formation, data collection and
+analysis, as well as manuscript composition. Professor Alan Marshall was the supervisory author
+on this project and was involved throughout the project in concept formation and manuscript
+edits.
+
+A version of Chapter 6 has been published in the journal IEEE Access as /Modulation
+analysis in Macro-Molecular Communications/ and presented in ACM Nanocom 2018 under the name
+/Asymmetrical Inter-Symbol Interference in Macro-Scale Molecular Communications/. I was
+the lead investigator, responsible for all major areas of concept formation, data collection
+and analysis, as well as the majority of manuscript composition. Professor Alan Marshall was
+the supervisory author on this project and was involved throughout the project in concept
+formation and manuscript edits.
+
+I was the lead investigator for the projects located in Chapters 7 where I was responsible for
+all major areas of concept formation, data collection and analysis, as well as the majority of
+manuscript composition. Professor Alan Marshall was the supervisory author on this project and
+was involved throughout the project in concept formation and manuscript edits.
+
+All simulations presented throughout the thesis were conducted using MATLAB 2018b (v9.5) by
+MathWorks.
