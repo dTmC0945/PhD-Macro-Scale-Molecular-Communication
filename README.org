@@ -15,8 +15,7 @@ Hello Everyone.
 | TYPE | LINK                         |
 |------+------------------------------|
 | PDF  | [[https://livrepository.liverpool.ac.uk/3076712/][Liverpool University Library]] |
-| HTML | Github Pages                 |
-
+| HTML | [[https://dtmc0945.github.io/PhD-Macro-Scale-Molecular-Communication/][Github Pages]]                 |
 
 This repo is a collection of my work, programs, experimental data I used during my PhD on
 Macro-Scale Molecular Communications which you can access it as PDF from the Liverpool library
